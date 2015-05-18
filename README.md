@@ -38,8 +38,8 @@ production_user_beta:
 MixedGauge.configure do |config|
   config.define_cluster(:user) do |cluster|
     cluster.define_slots(1..1024)
-    cluster.add(1..512, :production_user_alpha)
-    cluster.add(513..1024, :production_user_beta)
+    cluster.register(1..512, :production_user_alpha)
+    cluster.register(513..1024, :production_user_beta)
   end
 end
 ```

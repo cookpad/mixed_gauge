@@ -1,4 +1,8 @@
-require "mixed_gauge/version"
+require 'mixed_gauge/version'
+require 'mixed_gauge/cluster_config'
+require 'mixed_gauge/config'
+require 'mixed_gauge/routing'
+require 'mixed_gauge/model'
 
 module MixedGauge
   class << self
