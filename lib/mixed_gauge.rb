@@ -1,5 +1,13 @@
 require "mixed_gauge/version"
 
 module MixedGauge
-  # Your code goes here...
+  class << self
+    def config
+      @config ||= Config.new
+    end
+
+    def configure(&block)
+      config.instance_eval(&block)
+    end
+  end
 end
