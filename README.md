@@ -22,7 +22,39 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```yaml
+# database.yml
+production_user_alpha:
+  adapter: mysql2
+  username: user_writable
+  host: db-user-001
+production_user_beta:
+  adapter: mysql2
+  username: blog_writable
+  host: db-user-002
+```
+
+```ruby
+MixedGauge.configure do |config|
+  config.define_cluster(:user) do |cluster|
+    cluster.define_slots(1..1024)
+    cluster.add(1..512, :production_user_alpha)
+    cluster.add(513..1024, :production_user_beta)
+  end
+end
+```
+
+```ruby
+class User < ActiveRecord::Base
+  self.abstruct_class = true
+  include MixedGauge::Model
+  hash_key :email
+end
+
+user = User.get('alice@example.com')
+user.name = 'new alice'
+user.save!
+```
 
 ## Development
 
