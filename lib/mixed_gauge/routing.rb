@@ -6,17 +6,17 @@ module MixedGauge
       @cluster_config = cluster_config
     end
 
-    # @param [String] hash_key
+    # @param [String] dist_key
     # @return [String] connection name
-    def route(hash_key)
-      slot = hash_f(hash_key) % @cluster_config.slot_count
+    def route(key)
+      slot = hash_f(key) % @cluster_config.slot_count
       @cluster_config.fetch(slot)
     end
 
-    # @param [String] hash_key
+    # @param [String] key
     # @return [Integer]
-    def hash_f(hash_key)
-      Digest::MD5.hexdigest(hash_key).to_i(16)
+    def hash_f(key)
+      Digest::MD5.hexdigest(key).to_i(16)
     end
   end
 end

@@ -6,24 +6,29 @@ module MixedGauge
     # @param [Symbol] name
     def initialize(name)
       @name = name
-      @connections = {}
+      @connection_registry = {}
     end
 
     # @param [Range] slots
+    # @return [nil]
     def define_slots(slots)
       @slots = slots
+      nil
     end
 
     # @param [Range] slots
     # @param [Symbol] connection connection name
+    # @return [nil]
     def register(slots, connection)
-      @connections[slots] = connection
+      @connection_registry[slots] = connection
+      nil
     end
 
     def validate_config!
       # TODO
     end
 
+    # @return [Integer]
     def slot_count
       @slots.count
     end
@@ -31,7 +36,12 @@ module MixedGauge
     # @param [Integer] slot
     # @return [Symbol] registered connection name
     def fetch(slot)
-      @connections.find {|slot_range, name| slot_range.cover?(slot) }[1]
+      @connection_registry.find {|slot_range, name| slot_range.cover?(slot) }[1]
+    end
+
+    # @return [Array<Symbol>] An array of connection name
+    def connections
+      @connection_registry.values
     end
   end
 end

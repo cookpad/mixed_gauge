@@ -48,7 +48,7 @@ end
 class User < ActiveRecord::Base
   self.abstruct_class = true
   include MixedGauge::Model
-  hash_key :email
+  distkey :email
 end
 
 user = User.get('alice@example.com')
