@@ -1,8 +1,5 @@
 # MixedGauge
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/mixed_gauge`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+An ActiveRecord extension for database sharding.
 
 ## Installation
 
@@ -22,6 +19,8 @@ Or install it yourself as:
 
 ## Usage
 
+Add additional database connection config to `database.yml`.
+
 ```yaml
 # database.yml
 production_user_alpha:
@@ -34,6 +33,8 @@ production_user_beta:
   host: db-user-002
 ```
 
+Configure slots (virtual node for cluster) then assign slots to real node.
+
 ```ruby
 MixedGauge.configure do |config|
   config.define_cluster(:user) do |cluster|
@@ -44,16 +45,30 @@ MixedGauge.configure do |config|
 end
 ```
 
+Include `MixedGauge::Model` to your model class, specify cluster name for the
+model, specify distkey which determine nodes to store.
+
 ```ruby
 class User < ActiveRecord::Base
-  self.abstruct_class = true
   include MixedGauge::Model
+  use_cluster :user
   distkey :email
 end
+```
 
-user = User.get('alice@example.com')
-user.name = 'new alice'
-user.save!
+Use `.get` to retrive single model class which is connected to proper
+database node. Use `.put!` to create new record to proper database node.
+`.all_shards` enables you to all model class which is connected to all
+database nodes in the cluster.
+
+```ruby
+User.put!(email: 'alice@example.com', name: 'alice')
+
+alice = User.get('alice@example.com')
+alice.age = 1
+alice.save!
+
+User.all_shards.flat_map {|m| m.where(name: 'alice') }
 ```
 
 ## Development
