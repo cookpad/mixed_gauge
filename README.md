@@ -23,14 +23,22 @@ Add additional database connection config to `database.yml`.
 
 ```yaml
 # database.yml
-production_user_alpha:
+production_user_001:
   adapter: mysql2
   username: user_writable
   host: db-user-001
-production_user_beta:
+production_user_002:
   adapter: mysql2
-  username: blog_writable
+  username: user_writable
   host: db-user-002
+production_user_003:
+  adapter: mysql2
+  username: user_writable
+  host: db-user-003
+production_user_004:
+  adapter: mysql2
+  username: user_writable
+  host: db-user-004
 ```
 
 Configure slots (virtual node for cluster) then assign slots to real node.
@@ -38,9 +46,12 @@ Configure slots (virtual node for cluster) then assign slots to real node.
 ```ruby
 MixedGauge.configure do |config|
   config.define_cluster(:user) do |cluster|
-    cluster.define_slots(1..1024)
-    cluster.register(1..512, :production_user_alpha)
-    cluster.register(513..1024, :production_user_beta)
+    # When slots per node * max nodes per cluster = (2 ** 10) * (2 ** 10)
+    cluster.define_slots(1..1048576)
+    cluster.register(1..262144, :production_user_001)
+    cluster.register(262145..524288, :production_user_002)
+    cluster.register(524289..786432, :production_user_003)
+    cluster.register(786433..1048576, :production_user_004)
   end
 end
 ```

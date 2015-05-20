@@ -5,21 +5,21 @@ require 'mixed_gauge'
 
 base = { adapter: 'sqlite3' }
 ActiveRecord::Base.configurations = {
-  'user_001' => base.merge(database: 'user_001.sqlite3'),
-  'user_002' => base.merge(database: 'user_002.sqlite3'),
-  'user_003' => base.merge(database: 'user_003.sqlite3'),
-  'user_004' => base.merge(database: 'user_004.sqlite3'),
-  'default' => base.merge(database: 'default.sqlite3')
+  'production_user_001' => base.merge(database: 'user_001.sqlite3'),
+  'production_user_002' => base.merge(database: 'user_002.sqlite3'),
+  'production_user_003' => base.merge(database: 'user_003.sqlite3'),
+  'production_user_004' => base.merge(database: 'user_004.sqlite3'),
+  'production' => base.merge(database: 'default.sqlite3')
 }
-ActiveRecord::Base.establish_connection(:default)
+ActiveRecord::Base.establish_connection(:production)
 
 MixedGauge.configure do |config|
   config.define_cluster(:user) do |cluster|
-    cluster.define_slots(1..1024)
-    cluster.register(1..256, :user_001)
-    cluster.register(257..512, :user_002)
-    cluster.register(513..768, :user_003)
-    cluster.register(769..1024, :user_004)
+    cluster.define_slots(1..1048576)
+    cluster.register(1..262144, :production_user_001)
+    cluster.register(262145..524288, :production_user_002)
+    cluster.register(524289..786432, :production_user_003)
+    cluster.register(786433..1048576, :production_user_004)
   end
 end
 

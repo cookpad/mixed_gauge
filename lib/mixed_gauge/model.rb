@@ -43,6 +43,8 @@ module MixedGauge
         shard_for(key.to_s).find_by(distkey => key)
       end
 
+      # @param [Hash] attributes
+      # @return [ActiveRecord::Base] A sub class instance of included model
       def put!(attributes)
         if key = attributes[distkey] || attributes[distkey.to_s]
           shard_for(key).create!(attributes)

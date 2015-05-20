@@ -2,6 +2,7 @@ require 'digest/md5'
 
 module MixedGauge
   class Routing
+    # @param [ClusterConfig] cluster_config
     def initialize(cluster_config)
       @cluster_config = cluster_config
     end

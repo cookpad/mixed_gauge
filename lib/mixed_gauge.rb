@@ -9,6 +9,7 @@ require 'mixed_gauge/model'
 
 module MixedGauge
   class << self
+    # @return [MixedGauge::Config]
     def config
       @config ||= Config.new
     end
