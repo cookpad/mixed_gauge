@@ -25,6 +25,7 @@ module MixedGauge
     end
 
     module ClassMethods
+      # The cluster config must be defined before `use_cluster`.
       # @param [Symbol] A cluster name which is set by MixedGauge.configure
       def use_cluster(name)
         config = MixedGauge.config.fetch_cluster_config(name)
@@ -33,13 +34,19 @@ module MixedGauge
         self.abstract_class = true
       end
 
+      # Distkey is a column. mixed_gauge hashes that value and determine which
+      # shard to store.
       # @param [Symbol] column
       def def_distkey(column)
         self.distkey = column.to_sym
       end
 
+      # Create new record with given attributes in proper shard for given key.
+      # When distkey value is empty, raises MixedGauge::MissingDistkeyAttribute
+      # error.
       # @param [Hash] attributes
       # @return [ActiveRecord::Base] A sub class instance of included model
+      # @raise [MixedGauge::MissingDistkeyAttribute]
       def put!(attributes)
         @before_put_callback.call(attributes) if @before_put_callback
 
@@ -50,6 +57,7 @@ module MixedGauge
         end
       end
 
+      # Returns nil when not found. Except that, is same as `.get!`.
       # @param [String] key
       # @return [ActiveRecord::Base, nil] A sub model instance of included model
       def get(key)
@@ -57,6 +65,9 @@ module MixedGauge
         shard_for(key.to_s).find_by(distkey => key)
       end
 
+      # `.get!` raises MixedGauge::RecordNotFound which is child class of
+      # `ActiveRecord::RecordNotFound` so you can rescue that exception as same
+      # as AR's RecordNotFound.
       # @param [String] key
       # @return [ActiveRecord::Base] A sub model instance of included model
       # @raise [MixedGauge::RecordNotFound]
@@ -64,7 +75,10 @@ module MixedGauge
         get(key) or raise MixedGauge::RecordNotFound
       end
 
-      # Register hook to assign auto-generated distkey.
+      # Register hook to assign auto-generated distkey or something.
+      # Sometimes you want to generates distkey value before validation. Since
+      # mixed_gauge generates sub class of your models, AR's callback is not
+      # usesless for this usecase, so mixed_gauge offers its own callback method.
       # @example
       #   class User
       #     include MixedGauge::Model
@@ -78,6 +92,8 @@ module MixedGauge
         @before_put_callback = block
       end
 
+      # Returns a generated sub class of this model which is connected proper
+      # shard for given key.
       # @param [String] key A value of distkey
       # @return [Class] A sub model for this distkey value
       def shard_for(key)
@@ -85,7 +101,11 @@ module MixedGauge
         sub_model_repository.fetch(connection_name)
       end
 
+      # Returns all generated sub class of this model. Useful to query to
+      # all shards.
       # @return [Array<Class>] An array of sub models
+      # @example
+      #   User.all_shards.flat_map {|m| m.find_by(name: 'alice') }.compact
       def all_shards
         sub_model_repository.all
       end

@@ -84,6 +84,54 @@ alice.save!
 User.all_shards.flat_map {|m| m.find_by(name: 'alice') }.compact
 ```
 
+When you want find by non-distkey, not recomended tought, you can define finder
+methods to model class.
+
+```ruby
+class User < ActiveRecord::Base
+  include MixedGauge::Model
+  use_cluster :user
+  def_distkey :email
+
+  parent_methods do
+    def find_from_all_by_name(name)
+      all_shards.map {|m| m.find_by(name: name) }.compact.first
+    end
+  end
+end
+
+alice = User.find_from_all_by_name('Alice')
+alice.age = 0
+alice.save!
+```
+
+Sometimes you want to generates distkey value before validation. Since mixed_gauge
+generates sub class of your models, AR's callback is not usesless for this usecase,
+so mixed_gauge offers its own callback method.
+
+```ruby
+class AccessToken < ActiveRecord::Base
+  include MixedGauge::Model
+  use_cluster :access_token
+  def_distkey :token
+
+  validates :token, presence: true
+
+  def self.generate_token
+    SecureRandom.uuid
+  end
+
+  before_put do |attributes|
+    unless attributes[:token] || attributes['token']
+      attributes[:token] = generate_token
+    end
+  end
+end
+
+access_token = AccessToken.put!
+access_token.token #=> a generated token
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.

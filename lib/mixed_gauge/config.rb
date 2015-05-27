@@ -4,11 +4,14 @@ module MixedGauge
       @cluster_configs = {}
     end
 
+    # Define config for specific cluster.
     # @param [Symbol] cluster_name
     # @return [nil]
     # @example
-    #   config.define_cluster(:user) do |c|
-    #     c.define_slots(1..1024)
+    #   config.define_cluster(:user) do |cluster|
+    #     cluster.define_slots(1..1048576)
+    #     cluster.register(1..524288, :production_user_001)
+    #     cluster.register(524289..1048576, :production_user_002)
     #   end
     def define_cluster(cluster_name, &block)
       cluster_config = ClusterConfig.new(cluster_name)
