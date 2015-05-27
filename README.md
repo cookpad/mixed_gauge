@@ -81,7 +81,7 @@ alice = User.get('alice@example.com')
 alice.age = 1
 alice.save!
 
-User.all_shards.flat_map {|m| m.where(name: 'alice') }.compact
+User.all_shards.flat_map {|m| m.find_by(name: 'alice') }.compact
 ```
 
 ## Development
