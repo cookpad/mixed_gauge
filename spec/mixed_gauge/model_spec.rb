@@ -18,6 +18,12 @@ RSpec.describe MixedGauge::Model do
       before_put do |attrs|
         attrs[:name] = generate_name unless attrs[:name]
       end
+
+      parent_methods do
+        def find_from_all_by_name(name)
+          all_shards.map {|m| m.find_by(name: name) }.compact.first
+        end
+      end
     end
   end
 
@@ -76,6 +82,19 @@ RSpec.describe MixedGauge::Model do
     it 'returns all AR model classes and can search by finder methods' do
       records = model.all_shards.flat_map {|m| m.find_by(name: 'Alice') }.compact
       expect(records.size).to eq(1)
+    end
+  end
+
+  describe '.parent_methods' do
+    before do
+      model.put!(user_attributes)
+      model.put!(email: 'bob@example.com', name: 'bob')
+    end
+
+    it 'enables to define class methods to parent class' do
+      record = model.find_from_all_by_name('bob')
+      expect(record).not_to be_nil
+      expect(record.name).to eq('bob')
     end
   end
 end

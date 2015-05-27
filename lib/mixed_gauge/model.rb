@@ -81,6 +81,32 @@ module MixedGauge
       def all_shards
         sub_model_repository.all
       end
+
+      # Define utility methods which uses all shards or specific shard.
+      # These methods can be called from included model class.
+      # @example
+      #   class User
+      #     include MixedGauge::Model
+      #     use_cluster :user
+      #     def_distkey :name
+      #     parent_methods do
+      #       def all_count
+      #         all_shards.map {|m| m.count }.reduce(&:+)
+      #       end
+      #
+      #       def find_from_all_by(condition)
+      #         all_shards.flat_map {|m m.find_by(condition) }.compact.first
+      #       end
+      #     end
+      #   end
+      #
+      #   User.put!(email: 'a@m.com', name: 'a')
+      #   User.put!(email: 'b@m.com', name: 'b')
+      #   User.all_count #=> 2
+      #   User.find_from_all_by(name: 'b') #=> User b
+      def parent_methods(&block)
+        instance_eval(&block)
+      end
     end
   end
 end
