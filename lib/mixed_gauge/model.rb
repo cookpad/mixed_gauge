@@ -47,11 +47,27 @@ module MixedGauge
       # @param [Hash] attributes
       # @return [ActiveRecord::Base] A sub class instance of included model
       def put!(attributes)
+        @before_put_callback.call(attributes) if @before_put_callback
+
         if key = attributes[distkey] || attributes[distkey.to_s]
           shard_for(key).create!(attributes)
         else
           raise MixedGauge::MissingDistkeyAttribute
         end
+      end
+
+      # Register hook to assign auto-generated distkey.
+      # @example
+      #   class User
+      #     include MixedGauge::Model
+      #     use_cluster :user
+      #     def_distkey :name
+      #     before_put do |attributes|
+      #       attributes[:name] = generate_name unless attributes[:name]
+      #     end
+      #   end
+      def before_put(&block)
+        @before_put_callback = block
       end
 
       # @param [Object] key A value of distkey

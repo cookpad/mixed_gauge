@@ -7,9 +7,17 @@ RSpec.describe MixedGauge::Model do
         'User'
       end
 
+      def self.generate_name
+        'xxx'
+      end
+
       include MixedGauge::Model
       use_cluster :user
       def_distkey :email
+
+      before_put do |attrs|
+        attrs[:name] = generate_name unless attrs[:name]
+      end
     end
   end
 
@@ -42,6 +50,13 @@ RSpec.describe MixedGauge::Model do
       expect(record).to be_a(model)
       expect(record.email).to eq('alice@example.com')
       expect(record).to be_respond_to(:save!)
+    end
+  end
+
+  describe '.before_put' do
+    it 'calls registered hook before execute `put`' do
+      record = model.put!(email: 'xxx@example.com')
+      expect(record.name).to eq('xxx')
     end
   end
 
