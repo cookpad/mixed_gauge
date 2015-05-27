@@ -3,22 +3,6 @@
 
 An ActiveRecord extension for database sharding.
 
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'mixed_gauge'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install mixed_gauge
-
 ## Usage
 
 Add additional database connection config to `database.yml`.
@@ -146,6 +130,22 @@ Mixedgauge.configure do |config|
   end
 end
 ```
+
+## Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'mixed_gauge'
+```
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install mixed_gauge
 
 ## Development
 
