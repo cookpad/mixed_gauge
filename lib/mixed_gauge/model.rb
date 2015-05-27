@@ -5,7 +5,7 @@ module MixedGauge
   #   class User < ActiveRecord::Base
   #     include MixedGauge::Model
   #     use_cluster :user
-  #     distkey :email
+  #     def_distkey :email
   #   end
   #
   #   User.put!(email: 'alice@example.com', name: 'alice')
@@ -14,13 +14,14 @@ module MixedGauge
   #   alice.age = 1
   #   alice.save!
   #
-  #   User.all_shards.flat_map {|m| m.where(name: 'alice') }
+  #   User.all_shards.flat_map {|m| m.where(name: 'alice') }.compact
   module Model
     extend ActiveSupport::Concern
 
     included do
       class_attribute :cluster_routing, instance_writer: false
       class_attribute :sub_model_repository, instance_writer: false
+      class_attribute :distkey, instance_writer: false
     end
 
     module ClassMethods
@@ -33,7 +34,7 @@ module MixedGauge
       end
 
       # @param [Symbol] column
-      def distkey(column)
+      def def_distkey(column)
         self.distkey = column.to_sym
       end
 

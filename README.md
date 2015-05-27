@@ -63,7 +63,7 @@ model, specify distkey which determine nodes to store.
 class User < ActiveRecord::Base
   include MixedGauge::Model
   use_cluster :user
-  distkey :email
+  def_distkey :email
 end
 ```
 
@@ -79,7 +79,7 @@ alice = User.get('alice@example.com')
 alice.age = 1
 alice.save!
 
-User.all_shards.flat_map {|m| m.where(name: 'alice') }
+User.all_shards.flat_map {|m| m.where(name: 'alice') }.compact
 ```
 
 ## Development
