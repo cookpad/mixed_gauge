@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['taiks.4559@gmail.com']
 
   spec.summary       = %q{An ActiveRecord extension for database sharding.}
-  spec.description   = %q{Offers simple key-value action, node management with hash slots, allow to use some AR::B actions.}
+  spec.description   = %q{An ActiveRecord extension for database sharding. Offers node management with hash slots, simple key-value action, allow to use some ActiveRecord::Base actions.}
   spec.homepage      = 'https://github.com/taiki45/mixed_gauge'
   spec.license       = 'MIT'
 
