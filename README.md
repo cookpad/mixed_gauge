@@ -84,7 +84,7 @@ alice.save!
 User.all_shards.flat_map {|m| m.find_by(name: 'alice') }.compact
 ```
 
-When you want find by non-distkey, not recomended tought, you can define finder
+When you want find by non-distkey, not recomended though, you can define finder
 methods to model class.
 
 ```ruby
