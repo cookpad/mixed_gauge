@@ -22,6 +22,16 @@ RSpec.describe MixedGauge::Model do
       expect(record.name).to eq('Alice')
       expect(record).to be_respond_to(:save!)
     end
+
+    context 'without distkey attributes' do
+      before { user_attributes.delete(:name) }
+
+      it 'raises MissingDistkeyAttribute error' do
+        expect {
+          model.put!(user_attributes)
+        }.to raise_error(MixedGauge::MissingDistkeyAttribute)
+      end
+    end
   end
 
   describe '.get' do

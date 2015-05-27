@@ -1,6 +1,7 @@
 require 'active_record'
 
 require 'mixed_gauge/version'
+require 'mixed_gauge/errors'
 require 'mixed_gauge/cluster_config'
 require 'mixed_gauge/config'
 require 'mixed_gauge/routing'
