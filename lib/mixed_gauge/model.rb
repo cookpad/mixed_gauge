@@ -50,13 +50,14 @@ module MixedGauge
         end
       end
 
-      # @param [Object] key 
+      # @param [String] key
       # @return [ActiveRecord::Base, nil] A sub model instance of included model
       def get(key)
+        raise 'key must be a String' unless key.is_a?(String)
         shard_for(key.to_s).find_by(distkey => key)
       end
 
-      # @param [Object] key
+      # @param [String] key
       # @return [ActiveRecord::Base] A sub model instance of included model
       # @raise [MixedGauge::RecordNotFound]
       def get!(key)
@@ -77,7 +78,7 @@ module MixedGauge
         @before_put_callback = block
       end
 
-      # @param [Object] key A value of distkey
+      # @param [String] key A value of distkey
       # @return [Class] A sub model for this distkey value
       def shard_for(key)
         connection_name = cluster_routing.route(key.to_s)
