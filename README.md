@@ -1,4 +1,6 @@
 # MixedGauge
+[![Build Status](https://travis-ci.org/taiki45/mixed_gauge.svg?branch=master)](https://travis-ci.org/taiki45/mixed_gauge)
+
 An ActiveRecord extension for database sharding.
 
 ## Installation
