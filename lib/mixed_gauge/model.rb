@@ -38,6 +38,18 @@ module MixedGauge
         self.distkey = column.to_sym
       end
 
+      # @param [Hash] attributes
+      # @return [ActiveRecord::Base] A sub class instance of included model
+      def put!(attributes)
+        @before_put_callback.call(attributes) if @before_put_callback
+
+        if key = attributes[distkey] || attributes[distkey.to_s]
+          shard_for(key).create!(attributes)
+        else
+          raise MixedGauge::MissingDistkeyAttribute
+        end
+      end
+
       # @param [Object] key 
       # @return [ActiveRecord::Base, nil] A sub model instance of included model
       def get(key)
@@ -49,18 +61,6 @@ module MixedGauge
       # @raise [MixedGauge::RecordNotFound]
       def get!(key)
         get(key) or raise MixedGauge::RecordNotFound
-      end
-
-      # @param [Hash] attributes
-      # @return [ActiveRecord::Base] A sub class instance of included model
-      def put!(attributes)
-        @before_put_callback.call(attributes) if @before_put_callback
-
-        if key = attributes[distkey] || attributes[distkey.to_s]
-          shard_for(key).create!(attributes)
-        else
-          raise MixedGauge::MissingDistkeyAttribute
-        end
       end
 
       # Register hook to assign auto-generated distkey.
