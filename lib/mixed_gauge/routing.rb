@@ -17,7 +17,7 @@ module MixedGauge
     # @param [String] key
     # @return [Integer]
     def hash_f(key)
-      Digest::MD5.hexdigest(key).to_i(16)
+      MixedGauge.config.hash_proc.call(key)
     end
   end
 end

@@ -132,6 +132,21 @@ access_token = AccessToken.put!
 access_token.token #=> a generated token
 ```
 
+## Advanced configuration
+### Hash fucntion
+Register arbitrary hash function. Hash function must be a proc and
+must return integer.
+
+```ruby
+# gem install fnv
+require "fnv"
+Mixedgauge.configure do |config|
+  config.register_hash_function do |key|
+    FNV.new.fnv1a_64(key)
+  end
+end
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.
