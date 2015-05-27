@@ -1,5 +1,5 @@
 # MixedGauge
-[![Build Status](https://travis-ci.org/taiki45/mixed_gauge.svg?branch=master)](https://travis-ci.org/taiki45/mixed_gauge)
+[![Build Status](https://travis-ci.org/taiki45/mixed_gauge.svg?branch=master)](https://travis-ci.org/taiki45/mixed_gauge) [![Coverage Status](https://coveralls.io/repos/taiki45/mixed_gauge/badge.svg?branch=master)](https://coveralls.io/r/taiki45/mixed_gauge?branch=master) [![Code Climate](https://codeclimate.com/github/taiki45/mixed_gauge/badges/gpa.svg)](https://codeclimate.com/github/taiki45/mixed_gauge) [![Gem Version](https://badge.fury.io/rb/mixed_gauge.svg)](http://badge.fury.io/rb/mixed_gauge)
 
 An ActiveRecord extension for database sharding.
 
