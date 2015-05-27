@@ -49,13 +49,45 @@ RSpec.describe MixedGauge::Model do
   end
 
   describe '.get' do
-    before { model.put!(user_attributes) }
+    context 'when record exists' do
+      before { model.put!(user_attributes) }
+      it 'returns AR::B instance from proper node' do
+        record = model.get('alice@example.com')
+        expect(record).to be_a(model)
+        expect(record.email).to eq('alice@example.com')
+        expect(record).to be_respond_to(:save!)
+      end
+    end
 
-    it 'gets AR::B instance from proper node' do
-      record = model.get('alice@example.com')
-      expect(record).to be_a(model)
-      expect(record.email).to eq('alice@example.com')
-      expect(record).to be_respond_to(:save!)
+    context 'when record not exists' do
+      it 'returns nil' do
+        expect(model.get('not_exist@example.com')).to be_nil
+      end
+    end
+  end
+
+  describe '.get!' do
+    context 'when record exists' do
+      before { model.put!(user_attributes) }
+
+      it 'returns proper record' do
+        record = model.get('alice@example.com')
+        expect(record.email).to eq('alice@example.com')
+      end
+    end
+
+    context 'when record not exists' do
+      it 'raises MixedGauge::RecordNotFound' do
+        expect {
+          model.get!('not_exist@example.com')
+        }.to raise_error(MixedGauge::RecordNotFound)
+      end
+
+      it 'raises sub class of ActiveRecord::RecordNotFound' do
+        expect {
+          model.get!('not_exist@example.com')
+        }.to raise_error(ActiveRecord::RecordNotFound)
+      end
     end
   end
 

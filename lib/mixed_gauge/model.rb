@@ -39,9 +39,16 @@ module MixedGauge
       end
 
       # @param [Object] key 
-      # @return [ActiveRecord::Base] A auto-generated sub model of included model
+      # @return [ActiveRecord::Base, nil] A sub model instance of included model
       def get(key)
         shard_for(key.to_s).find_by(distkey => key)
+      end
+
+      # @param [Object] key
+      # @return [ActiveRecord::Base] A sub model instance of included model
+      # @raise [MixedGauge::RecordNotFound]
+      def get!(key)
+        get(key) or raise MixedGauge::RecordNotFound
       end
 
       # @param [Hash] attributes
