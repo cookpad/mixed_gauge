@@ -20,3 +20,6 @@ module MixedGauge
     end
   end
 end
+
+require 'mixed_gauge/database_tasks'
+require 'mixed_gauge/railtie' if defined? Rails

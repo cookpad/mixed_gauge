@@ -2,7 +2,7 @@ module MixedGauge
   class Config
     DEFAULT_HASH_FUNCTION = -> (key) { Digest::MD5.hexdigest(key).to_i(16) }
 
-    attr_reader :hash_proc
+    attr_reader :hash_proc, :cluster_configs
 
     def initialize
       @cluster_configs = {}
