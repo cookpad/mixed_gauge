@@ -135,4 +135,62 @@ RSpec.describe MixedGauge::DatabaseTasks do
       end
     end
   end
+
+  describe 'TasksForSingleConnection' do
+    describe 'version branching' do
+      def stub_ar_version(x, y, z)
+        stub_const('ActiveRecord::VERSION::MAJOR', x)
+        stub_const('ActiveRecord::VERSION::MINOR', y)
+        stub_const('ActiveRecord::VERSION::TINY', z)
+      end
+
+      let(:run) { described_class.load_schema('test') }
+      before { allow(ActiveRecord::Base).to receive(:configurations).and_return({}) }
+
+      context 'when AR 5.0.0' do
+        before { stub_ar_version(5, 0, 0) }
+
+        it 'calls AR::Tasks::DatabaseTasks.load_schema with configuration' do
+          expect(ActiveRecord::Tasks::DatabaseTasks).to receive(:load_schema)
+          run
+        end
+      end
+
+      context 'when AR 4.2.1' do
+        before { stub_ar_version(4, 2, 1) }
+
+        it 'calls AR::Tasks::DatabaseTasks.load_schema_for with configuration' do
+          expect(ActiveRecord::Tasks::DatabaseTasks).to receive(:load_schema_for)
+          run
+        end
+      end
+
+      context 'when AR 4.1.8' do
+        before { stub_ar_version(4, 1, 8) }
+
+        it 'calls AR::Tasks::DatabaseTasks.load_schema_for with configuration' do
+          expect(ActiveRecord::Tasks::DatabaseTasks).to receive(:load_schema_for)
+          run
+        end
+      end
+
+      context 'when AR 4.1.7' do
+        before { stub_ar_version(4, 1, 7) }
+
+        it 'calls establish_connection then calls AR::Tasks::DatabaseTasks.load_schema without configuration' do
+          expect(ActiveRecord::Base).to receive(:establish_connection)
+          expect(ActiveRecord::Tasks::DatabaseTasks).to receive(:load_schema)
+          run
+        end
+      end
+
+      context 'when AR 4.0.9' do
+        before { stub_ar_version(4, 0, 9) }
+
+        it 'raises error and show not supported' do
+          expect { run }.to raise_error(/not supported/)
+        end
+      end
+    end
+  end
 end

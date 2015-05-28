@@ -2,6 +2,31 @@ module MixedGauge
   module DatabaseTasks
     extend self
 
+    # @return [Boolean]
+    def ar5?
+      ActiveRecord::VERSION::MAJOR == 5
+    end
+
+    # @return [Boolean]
+    def ar4?
+      ActiveRecord::VERSION::MAJOR == 4
+    end
+
+    # @return [Boolean]
+    def ar42?
+      ar4? && ActiveRecord::VERSION::MINOR == 2
+    end
+
+    # @return [Boolean]
+    def ar41?
+      ar4? && ActiveRecord::VERSION::MINOR == 1
+    end
+
+    # @return [Boolean]
+    def ar417_above?
+      ar41? && ActiveRecord::VERSION::TINY > 7
+    end
+
     # Show information of database sharding config.
     def info
       puts "All clusters registered to mixed_gauge"
@@ -139,10 +164,18 @@ Missing cluster_name. Find cluster_name via `rake mixed_gauge:info` then call `r
       # @param [String] connection_name
       def load_schema(connection_name)
         configuration = ActiveRecord::Base.configurations[connection_name]
-        #ActiveRecord::Base.establish_connection(configuration)
-        # Use `.load_schema` for Rails > 4.2.
-        # Use `.load_schema_for` for Rails <= 4.2.
-        ActiveRecord::Tasks::DatabaseTasks.load_schema_for(configuration, :ruby)
+
+        case
+        when ar5?
+          ActiveRecord::Tasks::DatabaseTasks.load_schema(configuration, :ruby)
+        when ar42? || ar417_above?
+          ActiveRecord::Tasks::DatabaseTasks.load_schema_for(configuration, :ruby)
+        when ar41?
+          ActiveRecord::Base.establish_connection(configuration)
+          ActiveRecord::Tasks::DatabaseTasks.load_schema(:ruby)
+        else
+          raise "This version of ActiveRecord is not supported: v#{ActiveRecord::VERSION::STRING}"
+        end
       end
     end
     extend TasksForSingleConnection
