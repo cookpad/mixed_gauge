@@ -3,3 +3,10 @@ rvm:
   - '2.0'
   - '2.1'
   - '2.2'
+# Put this in your .travis.yml
+gemfile:
+  - gemfiles/ar_4.1.0.gemfile
+  - gemfiles/ar_4.1.7.gemfile
+  - gemfiles/ar_4.1.8.gemfile
+  - gemfiles/ar_4.2.gemfile
+  - gemfiles/rails_edge.gemfile
