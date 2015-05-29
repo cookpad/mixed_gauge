@@ -1,3 +1,8 @@
+# CHANGELOG for mixed_gauge
+
+## 0.1.3
+- Rake tasks to setup database cluster.
+
 ## 0.1.2
 - Enable to register before hook on `.put!`.
 - Enable to define arbitrary methods to model class.
