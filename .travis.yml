@@ -1,12 +1,19 @@
 language: ruby
 rvm:
-  - '2.0'
-  - '2.1'
-  - '2.2'
-# Put this in your .travis.yml
+  - 2.0
+  - 2.1
+  - 2.2
 gemfile:
   - gemfiles/ar_4.1.0.gemfile
   - gemfiles/ar_4.1.7.gemfile
   - gemfiles/ar_4.1.8.gemfile
   - gemfiles/ar_4.2.gemfile
   - gemfiles/rails_edge.gemfile
+allow_failures:
+  - gemfile: gemfiles/rails_edge.gemfile
+exclude:
+  # Rails 5 requires to run on Ruby 2.2.0 or newer.
+  - rvm: 2.0.0
+    gemfile: gemfiles/rails_edge.gemfile
+  - rvm: 2.1
+    gemfile: gemfiles/rails_edge.gemfile
