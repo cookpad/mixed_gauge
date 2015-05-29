@@ -118,7 +118,7 @@ RSpec.describe MixedGauge::DatabaseTasks do
         expect(described_class).not_to receive(:create)
         expect {
           described_class.create_all_databases(args)
-        }.to raise_error(SystemExit)
+        }.to output(/Missing cluster_name/).to_stderr.and raise_error(SystemExit)
       end
     end
 
@@ -131,7 +131,7 @@ RSpec.describe MixedGauge::DatabaseTasks do
         expect(described_class).not_to receive(:create)
         expect {
           described_class.create_all_databases(args)
-        }.to raise_error(SystemExit)
+        }.to output(/not found/).to_stderr.and raise_error(SystemExit)
       end
     end
   end

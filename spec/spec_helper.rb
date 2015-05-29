@@ -45,9 +45,11 @@ RSpec.configure do |config|
     ActiveRecord::Tasks::DatabaseTasks.root = File.expand_path('../..', __FILE__)
     ActiveRecord::Tasks::DatabaseTasks.env = 'test'
     args = { cluster_name: 'user' }
+    back, $stdout = $stdout, StringIO.new
     MixedGauge::DatabaseTasks.drop_all_databases(args)
     MixedGauge::DatabaseTasks.create_all_databases(args)
     MixedGauge::DatabaseTasks.load_schema_all_databases(args)
+    $stdout = back
   end
 
   config.after(:suite) do
