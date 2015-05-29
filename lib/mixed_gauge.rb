@@ -1,4 +1,5 @@
 require 'active_record'
+require 'expeditor'
 
 require 'mixed_gauge/version'
 require 'mixed_gauge/errors'
