@@ -1,6 +1,8 @@
+require 'zlib'
+
 module MixedGauge
   class Config
-    DEFAULT_HASH_FUNCTION = -> (key) { Digest::MD5.hexdigest(key).to_i(16) }
+    DEFAULT_HASH_FUNCTION = -> (key) { Zlib.crc32(key) }
 
     attr_reader :hash_proc, :cluster_configs
 
