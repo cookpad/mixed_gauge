@@ -83,7 +83,7 @@ RSpec.configure do |config|
 
   config.disable_monkey_patching!
 
-  config.warnings = true
+  config.warnings = true if ENV['RSPEC_WARNING'] == '1'
 
   if config.files_to_run.one?
     config.default_formatter = 'doc'
