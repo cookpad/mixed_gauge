@@ -1,5 +1,8 @@
 # CHANGELOG for mixed_gauge
 
+## 0.1.4
+- Support executing queries in parallel.
+
 ## 0.1.3
 - Rake tasks to setup database cluster.
 
