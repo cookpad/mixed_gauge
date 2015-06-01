@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'activerecord', '>= 4.1.0'
+  spec.add_dependency 'expeditor', '>= 0.1.0'
   spec.add_development_dependency 'appraisal'
   spec.add_development_dependency 'coveralls'
   spec.add_development_dependency 'pry'
