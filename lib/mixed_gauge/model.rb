@@ -48,6 +48,7 @@ module MixedGauge
       # @return [ActiveRecord::Base] A sub class instance of included model
       # @raise [MixedGauge::MissingDistkeyAttribute]
       def put!(attributes)
+        raise '`distkey` is not defined. Use `def_distkey`.' unless distkey
         @before_put_callback.call(attributes) if @before_put_callback
 
         if key = attributes[distkey] || attributes[distkey.to_s]
