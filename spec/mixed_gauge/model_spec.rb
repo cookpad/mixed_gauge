@@ -117,6 +117,12 @@ RSpec.describe MixedGauge::Model do
     end
   end
 
+  describe '.all_shards_in_parallel' do
+    it 'returns a MixedGauge::AllShardsInParallel' do
+      expect(User.all_shards_in_parallel).to be_a(MixedGauge::AllShardsInParallel)
+    end
+  end
+
   describe '.parent_methods' do
     before do
       model.put!(user_attributes)

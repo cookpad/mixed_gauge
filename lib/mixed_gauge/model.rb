@@ -111,6 +111,14 @@ module MixedGauge
         sub_model_repository.all
       end
 
+      # @return [Mixedgauge::AllShardsInParallel]
+      # @example
+      #   User.all_shards_in_parallel.map {|m| m.where.find_by(name: 'Alice') }.compact
+      def all_shards_in_parallel
+        AllShardsInParallel.new(all_shards)
+      end
+      alias_method :parallel, :all_shards_in_parallel
+
       # Define utility methods which uses all shards or specific shard.
       # These methods can be called from included model class.
       # @example
@@ -120,11 +128,11 @@ module MixedGauge
       #     def_distkey :name
       #     parent_methods do
       #       def all_count
-      #         all_shards.map {|m| m.count }.reduce(&:+)
+      #         parallel.map {|m| m.count }.reduce(&:+)
       #       end
       #
       #       def find_from_all_by(condition)
-      #         all_shards.flat_map {|m m.find_by(condition) }.compact.first
+      #         parallel.flat_map {|m m.find_by(condition) }.compact.first
       #       end
       #     end
       #   end

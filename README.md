@@ -65,6 +65,7 @@ end
 
 Use `.get` to retrive single model class which is connected to proper
 database node. Use `.put!` to create new record to proper database node.
+
 `.all_shards` enables you to all model class which is connected to all
 database nodes in the cluster.
 
@@ -78,6 +79,15 @@ alice.save!
 User.all_shards.flat_map {|m| m.find_by(name: 'alice') }.compact
 ```
 
+When you want to execute queries in parallel, use `.all_shards_in_parallel`.
+It returns `Mixedgauge::AllShardsInParallel` and it offers some collection
+actions which runs in parallel. It is aliased to `.parallel`.
+
+```ruby
+User.all_shards_in_parallel.map(&count) #=> 1
+User.parallel.flat_map {|m| m.where(age: 1) }.size #=> 1
+```
+
 When you want find by non-distkey, not recomended though, you can define finder
 methods to model class.
 
@@ -89,7 +99,7 @@ class User < ActiveRecord::Base
 
   parent_methods do
     def find_from_all_by_name(name)
-      all_shards.map {|m| m.find_by(name: name) }.compact.first
+      all_shards_in_parallel.map {|m| m.find_by(name: name) }.compact.first
     end
   end
 end
