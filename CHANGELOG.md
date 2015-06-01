@@ -1,5 +1,9 @@
 # CHANGELOG for mixed_gauge
 
+## 0.2.0
+- Replace default hash function from MD5 to CRC32. CRC32 is more distributed
+  for random data and more speedy than MD5.
+
 ## 0.1.4
 - Support executing queries in parallel.
 
