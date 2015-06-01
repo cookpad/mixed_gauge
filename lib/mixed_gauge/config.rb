@@ -11,7 +11,7 @@ module MixedGauge
 
     # Define config for specific cluster.
     # @param [Symbol] cluster_name
-    # @return [nil]
+    # @yield [MixedGauge::ClusterConfig]
     # @example
     #   config.define_cluster(:user) do |cluster|
     #     cluster.define_slots(1..1048576)
@@ -22,7 +22,6 @@ module MixedGauge
       cluster_config = ClusterConfig.new(cluster_name)
       cluster_config.instance_eval(&block)
       @cluster_configs[cluster_name] = cluster_config
-      nil
     end
 
     # @param [Symbol] cluster_name

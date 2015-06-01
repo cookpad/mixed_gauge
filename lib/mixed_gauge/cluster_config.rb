@@ -10,18 +10,14 @@ module MixedGauge
     end
 
     # @param [Range] slots
-    # @return [nil]
     def define_slots(slots)
       @slots = slots
-      nil
     end
 
     # @param [Range] slots
     # @param [Symbol] connection connection name
-    # @return [nil]
     def register(slots, connection)
       @connection_registry[slots] = connection
-      nil
     end
 
     def validate_config!

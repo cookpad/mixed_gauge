@@ -17,6 +17,7 @@ module MixedGauge
       @config ||= Config.new
     end
 
+    # @yield [MixedGauge::Config]
     def configure(&block)
       config.instance_eval(&block)
     end
