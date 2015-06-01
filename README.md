@@ -138,8 +138,10 @@ access_token.token #=> a generated token
 
 ## Advanced configuration
 ### Hash fucntion
-Register arbitrary hash function. Hash function must be a proc and
-must return integer.
+Default hash fucntion is CRC32, which has better perfomance for this kind of
+usecase.
+
+But you can use arbitrary hash function like:
 
 ```ruby
 # gem install fnv
@@ -150,6 +152,12 @@ Mixedgauge.configure do |config|
   end
 end
 ```
+
+Suggested hash functions are:
+
+- MurmurHash
+- FNV Hash
+- SuperFastHash
 
 ## Installation
 
