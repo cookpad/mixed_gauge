@@ -1,5 +1,8 @@
 # CHANGELOG for mixed_gauge
 
+## 0.2.1
+- Fix performance issue that `MixedGauge::Model.shard_for` is very slow.
+
 ## 0.2.0
 - Replace default hash function from MD5 to CRC32. CRC32 is more distributed
   for random data and more speedy than MD5.
