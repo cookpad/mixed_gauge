@@ -9,7 +9,7 @@ module MixedGauge
       @connection_registry = {}
     end
 
-    # @param [Range] slots
+    # @param [Range] slots Range consisted with Fixnum.
     def define_slots(slots)
       @slots = slots
     end
@@ -22,11 +22,12 @@ module MixedGauge
 
     def validate_config!
       # TODO
+      # validate non Fixnum slots.
     end
 
     # @return [Integer]
-    def slot_count
-      @slots.count
+    def slot_size
+      @slots.size
     end
 
     # @param [Integer] slot
