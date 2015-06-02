@@ -10,7 +10,7 @@ module MixedGauge
     # @param [String] dist_key
     # @return [String] connection name
     def route(key)
-      slot = hash_f(key) % @cluster_config.slot_count
+      slot = hash_f(key) % @cluster_config.slot_size
       @cluster_config.fetch(slot)
     end
 

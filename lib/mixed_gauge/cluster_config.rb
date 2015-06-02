@@ -25,8 +25,8 @@ module MixedGauge
     end
 
     # @return [Integer]
-    def slot_count
-      @slots.count
+    def slot_size
+      @slots.size
     end
 
     # @param [Integer] slot
