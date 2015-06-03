@@ -1,5 +1,6 @@
 language: ruby
 sudo: false
+script: "bundle exec rake && bundle exec ruby spec/performance_test.rb"
 branches:
   only:
     - master

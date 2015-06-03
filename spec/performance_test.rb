@@ -15,7 +15,9 @@ n = 10 ** 3
 s = SecureRandom.hex(32)
 elasped_time = measure(n) { User.shard_for(s) }
 
+puts '=== Performance test result ==='
 puts "#{n} times of `User.shard_for` tooks #{elasped_time} sec"
+puts '===        End result       ==='
 
 if elasped_time >= 0.01
   exit 1
