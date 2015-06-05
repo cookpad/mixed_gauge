@@ -7,6 +7,7 @@ module MixedGauge
       @cluster_config = cluster_config
     end
 
+    # slot can be one of (0..slot_size - 1)
     # @param [String] dist_key
     # @return [String] connection name
     def route(key)
