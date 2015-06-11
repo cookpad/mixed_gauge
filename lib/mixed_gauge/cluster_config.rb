@@ -28,7 +28,7 @@ module MixedGauge
 
     # @return [Integer]
     def slot_size
-      @slots.size
+      defined?(@slot_size) ? @slot_size : @slot_size = @slots.size
     end
 
     # @param [Integer] slot

@@ -40,4 +40,15 @@ RSpec.describe MixedGauge::ClusterConfig do
       expect { config.validate_config! }.to raise_error(/connection_b/)
     end
   end
+
+  describe '#slot_size' do
+    before do
+      config.define_slot_size(10)
+      config.register(0..4, :connection_a)
+      config.register(5..9, :connection_b)
+    end
+
+    subject { config.slot_size }
+    it { is_expected.to eq(10) }
+  end
 end
