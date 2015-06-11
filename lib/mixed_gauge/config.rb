@@ -12,14 +12,9 @@ module MixedGauge
     end
 
     # Define config for specific cluster.
+    # See README.md for example.
     # @param [Symbol] cluster_name
     # @yield [MixedGauge::ClusterConfig]
-    # @example
-    #   config.define_cluster(:user) do |cluster|
-    #     cluster.define_slots(1..1048576)
-    #     cluster.register(1..524288, :production_user_001)
-    #     cluster.register(524289..1048576, :production_user_002)
-    #   end
     def define_cluster(cluster_name, &block)
       cluster_config = ClusterConfig.new(cluster_name)
       cluster_config.instance_eval(&block)
@@ -34,14 +29,7 @@ module MixedGauge
 
     # Register arbitrary hash function. Hash function must be a proc and
     # must return integer.
-    # @example
-    #   # gem install fnv
-    #   require "fnv"
-    #   Mixedgauge.configure do |config|
-    #     config.register_hash_function do |key|
-    #       FNV.new.fnv1a_64(key)
-    #     end
-    #   end
+    # See README.md for example.
     def register_hash_function(&block)
       raise ArgumentError if block.arity != 1
       raise ArgumentError unless block.call('test value').is_a? Integer

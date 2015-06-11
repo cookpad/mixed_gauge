@@ -43,11 +43,11 @@ Configure slots (virtual node for cluster) then assign slots to real node.
 MixedGauge.configure do |config|
   config.define_cluster(:user) do |cluster|
     # When slots per node * max nodes per cluster = (2 ** 10) * (2 ** 10)
-    cluster.define_slots(1..1048576)
-    cluster.register(1..262144, :production_user_001)
-    cluster.register(262145..524288, :production_user_002)
-    cluster.register(524289..786432, :production_user_003)
-    cluster.register(786433..1048576, :production_user_004)
+    cluster.define_slot_size(1048576)
+    cluster.register(0..262143, :production_user_001)
+    cluster.register(262144..524287, :production_user_002)
+    cluster.register(524288..786431, :production_user_003)
+    cluster.register(786432..1048575, :production_user_004)
   end
 end
 ```

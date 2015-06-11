@@ -9,15 +9,16 @@ module MixedGauge
       @connection_registry = {}
     end
 
-    # @param [Range] slots Range consisted with Fixnum.
-    def define_slots(slots)
-      @slots = slots
+    # @param [Integer] size The slot size of this cluster.
+    def define_slot_size(n)
+      @slots = 0..(n - 1)
     end
 
-    # @param [Range] slots
+    # @param [Range] assigned_slots The assigned range of slots of given
+    #   connection (shard).
     # @param [Symbol] connection connection name
-    def register(slots, connection)
-      @connection_registry[slots] = connection
+    def register(assigned_slots, connection)
+      @connection_registry[assigned_slots] = connection
     end
 
     def validate_config!
