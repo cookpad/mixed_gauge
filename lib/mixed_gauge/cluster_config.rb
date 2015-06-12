@@ -52,12 +52,12 @@ module MixedGauge
 
       # @raise [RuntimeError]
       def validate!
-        all_start_points = @connection_registry.keys.map(&:first).sort
-        all_end_points = @connection_registry.keys.map(&:last).sort
+        all_start_points = @connection_registry.keys.map(&:min).sort
+        all_end_points = @connection_registry.keys.map(&:max).sort
 
-        check_first_start_point(all_start_points.first)
+        check_first_start_point(all_start_points.min)
         check_coverage(all_start_points, all_end_points)
-        check_last_end_point(all_end_points.last)
+        check_last_end_point(all_end_points.max)
       end
 
       private
@@ -91,7 +91,7 @@ module MixedGauge
 
       # @param [Integer] point
       def report_invalid_first_start_point(point)
-        r = @connection_registry.keys.find {|range| range.first == point }
+        r = @connection_registry.keys.find {|range| range.min == point }
         connection = @connection_registry[r]
         raise "First start point must be `0` but given `#{point}`: invalid slot configuration for #{connection}"
       end
@@ -99,17 +99,17 @@ module MixedGauge
       # @param [Integer] end_point
       # @param [Integer] next_start_point
       def report_invalid_coverage(end_point, next_start_point)
-        end_point_slot = @connection_registry.keys.find {|range| range.last == end_point }
+        end_point_slot = @connection_registry.keys.find {|range| range.max == end_point }
         end_point_connection = @connection_registry[end_point_slot]
         start_point_slot = @connection_registry.keys.
-          find {|range| range.first == next_start_point && range.last != end_point }
+          find {|range| range.min == next_start_point && range.max != end_point }
         start_point_connection = @connection_registry[start_point_slot]
         raise %!End point `#{end_point}` of "#{end_point_connection}" or start point `#{next_start_point}` of "#{start_point_connection}" is invalid. Next start point must be "previous end point + 1".!
       end
 
       # @param [Integer] point
       def report_invalid_last_end_point(point)
-        r = @connection_registry.keys.find {|range| range.last == point }
+        r = @connection_registry.keys.find {|range| range.max == point }
         connection = @connection_registry[r]
         raise "Last end point must be `#{@slot_size - 1}` but given `#{point}`: invalid slot configuration for #{connection}"
       end

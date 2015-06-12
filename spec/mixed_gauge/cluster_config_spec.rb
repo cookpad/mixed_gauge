@@ -39,6 +39,16 @@ RSpec.describe MixedGauge::ClusterConfig do
       expect { config.validate_config! }.to raise_error(/`10`/)
       expect { config.validate_config! }.to raise_error(/connection_b/)
     end
+
+    it 'checks invalid coverage with open interval range' do
+      config.define_slot_size(10)
+      config.register(0...4, :connection_a)
+      config.register(5...9, :connection_b)
+
+      expect { config.validate_config! }.to raise_error(/`3`/)
+      expect { config.validate_config! }.to raise_error(/`5`/)
+      expect { config.validate_config! }.to raise_error(/connection_a.*connection_b/)
+    end
   end
 
   describe '#slot_size' do
