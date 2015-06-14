@@ -3,18 +3,120 @@
 
 A simple and robust ActiveRecord extension for database sharding.
 mixed_gauge offers shards management with hash slots, re-sharding support,
-KVS actions, some ActiveRecord::Base actions.
+KVS queries and some RDB queries.
 
-## Concept
-Shard management is based on hash slots mechanism.
 
-TODO: more doc.
+## Goal and concept
+- Simple
+- No downtime migrations
+- Rollback-able operations
 
-## Why and When to use mixed_gauge
-TODO
+Database sharding tend to be over-complexed. There are cases which need these complex database sharding but in some cases database sharding can be more simple. The large data set which is enoght big to partition should be designed to be distributed, or should be re-design if it wasn't. Design to be distributed uses key based relation or reverse indexes to fits its limitation. In that case, the data set is almost design to be distributed, mixed_gauge strongly encourages your database sharding by its simplicity.
+
+We, offer 24/7 services, must keep our services running. mixed_gauge supports online migrations: adding new nodes to cluster or removing some existing nodes from cluster. It comes with "key distibution model with hash slots" and  database replication and multi-master replication. In sharding we need re-sharding, move data from node to anoter node in cluster, when adding or removing new nodes from cluster. But by setting some rule to node management and using replication, we can finish moving data before adding or removing nodes. The detail operations are specified later chapter of this document.
+
+All operaions should be rollback-able in case of any failures. mixed_gauge's node management can rollback adding and removing nodes operation. The detail operations are specified later chapter of this document.
+
+
+## Main components of sharding teqnique
+### Distribution model
+mixed_gauge's database sharding is based on keys distribution model with hash slots. The key space is split into arbitrary size of slots. `hash(v) mod N` determines which slot is used where `N` is size of configured hash slots. Hash slot is a virtual node and it is assigned to real node.
+
+The default hash function is CRC32 which has better perfomance for this kind of cases. You can use other hash function.
+
+### Node management
+mixed_gauge's database sharding sets a rule to both adding nodes and removing nodes. The node size must be incresed by multiple of 2. At first, the node size is 1. Then the node size is incresed to 2, next is 4, and next of next is 8.
+
+By setting this rule, we can move (copy) data from node to node before adding or removing nodes by "database replication". For example, when we have `cluster(A)`, which has single node A and node A is assigned (0..1023) hash slots, and plan to migrate to `cluster(A, B)`, which has 2 nodes A and B and node A is assigned (0..511) slots and node B is assigned (512..1023) slots, we can copy and replicate from A to B before migration then just balance hash slots to node B.
+
+```
+(1)              (2)                               (3)
+   ┌───────┐           ┌───────┐       ┌───────┐         ┌───────┐       ┌───────┐
+   │       │           │       │       │       │         │       │       │       │
+   │   A   │           │   A   │──────▶│   B   │         │   A   │       │   B   │
+   │       │           │       │       │       │         │       │       │       │
+   └───────┘           └───────┘       └───────┘         └───────┘       └───────┘
+
+    0..1023             0..1023                           0..511         512..1023
+```
+
+### Migration operations
+```
+(1) From 1 node cluster
+
+     0..1023
+    ┌───────┐
+    │       │
+    │       │
+    │   A   │
+    │       │
+    │       │
+    └───────┘
+
+(2) Copy data and start replication
+
+     0..1023
+    ┌───────┐       ┌───────┐
+    │       │       │       │
+    │       │       │       │
+    │   A   │──────▶│   B   │
+    │       │       │       │
+    │       │       │       │
+    └───────┘       └───────┘
+
+(3) Change auto_increment config
+
+     0..1023
+  1 ┌───────┐       ┌───────┐ 1000
+  3 │       │       │       │ 1002
+  5 │       │       │       │ 1004
+  . │   A   │──────▶│   B   │  .
+  . │       │       │       │  .
+    │       │       │       │
+    └───────┘       └───────┘
+   increment=2    increment=2
+     offset=1     offset=1000
+
+(4) Start Multi-master replication
+
+     0..1023
+    ┌───────┐       ┌───────┐
+    │       │──────▶│       │
+    │       │       │       │
+    │   A   │       │   B   │
+    │       │       │       │
+    │       │◀──────│       │
+    └───────┘       └───────┘
+
+(5) Deploy app and apply new cluster
+configuration
+
+    0..511         512..1023
+   ┌───────┐       ┌───────┐
+   │       │──────▶│       │
+   │       │       │       │
+   │   A   │       │   B   │
+   │       │       │       │
+   │       │◀──────│       │
+   └───────┘       └───────┘
+
+(6) Stop Multi-master replication
+
+    0..511         512..1023
+   ┌───────┐       ┌───────┐
+   │       │       │       │
+   │       │       │       │
+   │   A   │       │   B   │
+   │       │       │       │
+   │       │       │       │
+   └───────┘       └───────┘
+```
+
+In step 3, we set enough big offset not to conflict auto increment value
+on applying config.
+
 
 ## Usage
-
 Add additional database connection config to `database.yml`.
 
 ```yaml
@@ -53,7 +155,7 @@ end
 ```
 
 Include `MixedGauge::Model` to your model class, specify cluster name for the
-model, specify distkey which determine nodes to store.
+model, specify distkey which determines node to store.
 
 ```ruby
 class User < ActiveRecord::Base
@@ -63,11 +165,11 @@ class User < ActiveRecord::Base
 end
 ```
 
-Use `.get` to retrive single model class which is connected to proper
+Use `.get` to retrive single record which is connected to proper
 database node. Use `.put!` to create new record to proper database node.
 
-`.all_shards` enables you to all model class which is connected to all
-database nodes in the cluster.
+`.all_shards` returns each model class which is connected to proper
+database node. You can query with these models and aggregate result.
 
 ```ruby
 User.put!(email: 'alice@example.com', name: 'alice')
@@ -79,7 +181,7 @@ alice.save!
 User.all_shards.flat_map {|m| m.find_by(name: 'alice') }.compact
 ```
 
-When you want to execute queries in parallel, use `.all_shards_in_parallel`.
+When you want to execute queries in all nodes in parallel, use `.all_shards_in_parallel`.
 It returns `Mixedgauge::AllShardsInParallel` and it offers some collection
 actions which runs in parallel. It is aliased to `.parallel`.
 
@@ -89,7 +191,7 @@ User.parallel.flat_map {|m| m.where(age: 1) }.size #=> 1
 ```
 
 When you want find by non-distkey, not recomended though, you can define finder
-methods to model class.
+methods to model class for convenience.
 
 ```ruby
 class User < ActiveRecord::Base
@@ -110,7 +212,7 @@ alice.save!
 ```
 
 Sometimes you want to generates distkey value before validation. Since mixed_gauge
-generates sub class of your models, AR's callback is not usesless for this usecase,
+generates sub class of your models, AR's callback is usesless for this usecase,
 so mixed_gauge offers its own callback method.
 
 ```ruby
@@ -136,6 +238,7 @@ access_token = AccessToken.put!
 access_token.token #=> a generated token
 ```
 
+
 ## Advanced configuration
 ### Hash fucntion
 Default hash fucntion is CRC32, which has better perfomance for this kind of
@@ -159,8 +262,8 @@ Suggested hash functions are:
 - FNV Hash
 - SuperFastHash
 
-## Installation
 
+## Installation
 Add this line to your application's Gemfile:
 
 ```ruby
@@ -175,6 +278,6 @@ Or install it yourself as:
 
     $ gem install mixed_gauge
 
-## Contributing
 
+## Contributing
 Feel free to pull request and issue :)
