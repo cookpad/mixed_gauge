@@ -2,12 +2,12 @@ module MixedGauge
   # Support parallel execution with each shard and deal with AR connection
   # management in parallel execution.
   class AllShardsInParallel
-    # @param [Array<Class>] An array of sub model class
+    # @param [Array<Class>] An array of shard model class
     def initialize(shards)
       @shards = shards
     end
 
-    # @yield [Class] A sub model class
+    # @yield [Class] A shard model class
     # @return [Array] A result
     # @example
     #   User.all_shards_in_parallel.map(&:count).reduce(&:+)
@@ -19,7 +19,7 @@ module MixedGauge
       commands.map(&:get)
     end
 
-    # @yield [Class] A sub model class
+    # @yield [Class] A shard model class
     # @return [Array] A result
     # @example
     #   User.all_shards_in_parallel.flat_map {|m| m.where(age: 1) }
@@ -27,7 +27,7 @@ module MixedGauge
       map(&block).flatten
     end
 
-    # @yield [Class] A sub model class
+    # @yield [Class] A shard model class
     # @return [MixedGauge::AllShardsInParallel]
     # @example
     #   User.all_shards_in_parallel.each {|m| puts m.count }
