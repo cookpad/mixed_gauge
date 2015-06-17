@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Taiki Ono']
   spec.email         = ['taiks.4559@gmail.com']
 
-  spec.summary       = %{An ActiveRecord extension for database sharding including re-sharding support.}
-  spec.description   = %{#{spec.summary} Offers shards management with hash slots, re-sharding support, key-value action, some ActiveRecord::Base actions.}
+  spec.summary       = %{A simple and robust ActiveRecord extension for database sharding.}
+  spec.description   = %{#{spec.summary} Supports shards management with hash slots, re-sharding support, efficient KVS queries, limited RDB queries.}
   spec.homepage      = 'https://github.com/taiki45/mixed_gauge'
   spec.license       = 'MIT'
 
