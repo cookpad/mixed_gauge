@@ -45,10 +45,10 @@ module MixedGauge
       model
     end
 
-    # @param [Symbol] name
+    # @param [Symbol] connection_name
     # @return [String]
-    def generate_class_name(name)
-      "GeneratedModel#{name.to_s.gsub('-', '_').classify}"
+    def generate_class_name(connection_name)
+      "ShardFor#{connection_name.to_s.gsub('-', '_').classify}"
     end
   end
 end
