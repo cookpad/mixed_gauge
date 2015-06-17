@@ -20,7 +20,7 @@ module MixedGauge
 
     included do
       class_attribute :cluster_routing, instance_writer: false
-      class_attribute :sub_model_repository, instance_writer: false
+      class_attribute :shard_repository, instance_writer: false
       class_attribute :distkey, instance_writer: false
     end
 
@@ -30,7 +30,7 @@ module MixedGauge
       def use_cluster(name)
         config = MixedGauge.config.fetch_cluster_config(name)
         self.cluster_routing = MixedGauge::Routing.new(config)
-        self.sub_model_repository = MixedGauge::SubModelRepository.new(config, self)
+        self.shard_repository = MixedGauge::ShardRepository.new(config, self)
         self.abstract_class = true
       end
 
@@ -45,7 +45,7 @@ module MixedGauge
       # When distkey value is empty, raises MixedGauge::MissingDistkeyAttribute
       # error.
       # @param [Hash] attributes
-      # @return [ActiveRecord::Base] A sub class instance of included model
+      # @return [ActiveRecord::Base] A shard model instance
       # @raise [MixedGauge::MissingDistkeyAttribute]
       def put!(attributes)
         raise '`distkey` is not defined. Use `def_distkey`.' unless distkey
@@ -60,7 +60,7 @@ module MixedGauge
 
       # Returns nil when not found. Except that, is same as `.get!`.
       # @param [String] key
-      # @return [ActiveRecord::Base, nil] A sub model instance of included model
+      # @return [ActiveRecord::Base, nil] A shard model instance
       def get(key)
         raise 'key must be a String' unless key.is_a?(String)
         shard_for(key.to_s).find_by(distkey => key)
@@ -70,7 +70,7 @@ module MixedGauge
       # `ActiveRecord::RecordNotFound` so you can rescue that exception as same
       # as AR's RecordNotFound.
       # @param [String] key
-      # @return [ActiveRecord::Base] A sub model instance of included model
+      # @return [ActiveRecord::Base] A shard model instance
       # @raise [MixedGauge::RecordNotFound]
       def get!(key)
         get(key) or raise MixedGauge::RecordNotFound
@@ -93,22 +93,21 @@ module MixedGauge
         @before_put_callback = block
       end
 
-      # Returns a generated sub class of this model which is connected proper
-      # shard for given key.
+      # Returns a generated model class of included model class which has proper
+      # connection config for the shard for given key.
       # @param [String] key A value of distkey
-      # @return [Class] A sub model for this distkey value
+      # @return [Class] A generated model class for given distkey value
       def shard_for(key)
         connection_name = cluster_routing.route(key.to_s)
-        sub_model_repository.fetch(connection_name)
+        shard_repository.fetch(connection_name)
       end
 
-      # Returns all generated sub class of this model. Useful to query to
-      # all shards.
-      # @return [Array<Class>] An array of sub models
+      # Returns all generated shard model class. Useful to query to all shards.
+      # @return [Array<Class>] An array of shard models
       # @example
       #   User.all_shards.flat_map {|m| m.find_by(name: 'alice') }.compact
       def all_shards
-        sub_model_repository.all
+        shard_repository.all
       end
 
       # @return [Mixedgauge::AllShardsInParallel]

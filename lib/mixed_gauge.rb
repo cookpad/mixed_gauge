@@ -6,7 +6,7 @@ require 'mixed_gauge/errors'
 require 'mixed_gauge/cluster_config'
 require 'mixed_gauge/config'
 require 'mixed_gauge/routing'
-require 'mixed_gauge/sub_model_repository'
+require 'mixed_gauge/shard_repository'
 require 'mixed_gauge/all_shards_in_parallel'
 require 'mixed_gauge/model'
 

@@ -1,5 +1,5 @@
 module MixedGauge
-  class SubModelRepository
+  class ShardRepository
     attr_reader :base_class
 
     # @param [ClusterConfig] cluster_config
@@ -7,32 +7,33 @@ module MixedGauge
     def initialize(cluster_config, base_class)
       @base_class = base_class
 
-      sub_models = cluster_config.connections.map do |connection_name|
-        [connection_name, generate_sub_model(connection_name)]
+      shards = cluster_config.connections.map do |connection_name|
+        [connection_name, generate_model_for_shard(connection_name)]
       end
-      @sub_models = Hash[sub_models]
+      @shards = Hash[shards]
     end
 
     # @param [Symbol] connection_name
-    # @return [Class] A sub model of given base class
+    # @return [Class] A model class for this shard
     def fetch(connection_name)
-      @sub_models.fetch(connection_name)
+      @shards.fetch(connection_name)
     end
 
     # @return [Array<Class>]
     def all
-      @sub_models.values
+      @shards.values
     end
 
     private
 
     # @param [Symbol] connection_name
-    # @return [Class] A generated sub class of given AR model
-    def generate_sub_model(connection_name)
+    # @return [Class] A sub class of given AR model.
+    #   A sub class has connection setting for specific shard.
+    def generate_model_for_shard(connection_name)
       base_class_name = @base_class.name
       class_name = generate_class_name(connection_name)
 
-      sub_model = Class.new(base_class) do
+      model = Class.new(base_class) do
         self.table_name = base_class.table_name
         module_eval <<-RUBY, __FILE__, __LINE__ + 1
           def self.name
@@ -40,14 +41,14 @@ module MixedGauge
           end
         RUBY
       end
-      sub_model.class_eval { establish_connection(connection_name) }
-      sub_model
+      model.class_eval { establish_connection(connection_name) }
+      model
     end
 
-    # @param [Symbol] name
+    # @param [Symbol] connection_name
     # @return [String]
-    def generate_class_name(name)
-      "GeneratedModel#{name.to_s.gsub('-', '_').classify}"
+    def generate_class_name(connection_name)
+      "ShardFor#{connection_name.to_s.gsub('-', '_').classify}"
     end
   end
 end
