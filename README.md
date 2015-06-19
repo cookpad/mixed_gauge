@@ -66,17 +66,18 @@ By setting this rule, we can move (copy) data from node to node before adding or
     └───────┘       └───────┘
 
 (3) Change auto_increment config
+not to conflict id column
 
      0..1023
-  1 ┌───────┐       ┌───────┐ 1000
-  3 │       │       │       │ 1002
-  5 │       │       │       │ 1004
-  . │   A   │──────▶│   B   │  .
-  . │       │       │       │  .
+  1 ┌───────┐       ┌───────┐ 2
+  3 │       │       │       │ 4
+  5 │       │       │       │ 6
+  . │   A   │──────▶│   B   │ .
+  . │       │       │       │ .
     │       │       │       │
     └───────┘       └───────┘
    increment=2    increment=2
-     offset=1     offset=1000
+     offset=1       offset=2
 
 (4) Start Multi-master replication
 
