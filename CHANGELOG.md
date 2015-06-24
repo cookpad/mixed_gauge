@@ -1,4 +1,9 @@
 # CHANGELOG for mixed_gauge
+## 1.0.0
+- Change cluster slots definition interface: does not specify entire slots,
+    but specify only slots size.
+- Add config validation.
+- Change class name of generated model: SubModel -> Shard
 
 ## 0.2.1
 - Fix performance issue that `MixedGauge::Model.shard_for` is very slow.
