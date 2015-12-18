@@ -1,11 +1,12 @@
-# MixedGauge
+# mixed_gauge
 [![Build Status](https://travis-ci.org/taiki45/mixed_gauge.svg?branch=master)](https://travis-ci.org/taiki45/mixed_gauge) [![Coverage Status](https://coveralls.io/repos/taiki45/mixed_gauge/badge.svg?branch=master)](https://coveralls.io/r/taiki45/mixed_gauge?branch=master) [![Code Climate](https://codeclimate.com/github/taiki45/mixed_gauge/badges/gpa.svg)](https://codeclimate.com/github/taiki45/mixed_gauge) [![Gem Version](https://badge.fury.io/rb/mixed_gauge.svg)](http://badge.fury.io/rb/mixed_gauge)
 
 A simple and robust ActiveRecord extension for database sharding.
 mixed_gauge offers shards management with hash slots and re-sharding support.
 It enable you to execute efficient queries to single node with KVS-like interface.
-And you can even execute limited RDB queries to all nodes with ActiveRecord interface,
-'course in-parallel.
+And you can even execute limited RDB queries to all nodes with ActiveRecord interface in-parallel.
+
+mixed_gauge is already used in production. [(blog post in Japanese)](http://techlife.cookpad.com/entry/2015/06/22/134108)
 
 ## Goal and concept
 - Simple
