@@ -15,7 +15,7 @@ mixed_gauge is already used in production. [(blog post in Japanese)](http://tech
 
 Database sharding tend to be over-complexed. There are cases which need these complex database sharding but in some cases database sharding can be more simple. The large data set which is enoght big to partition should be designed to be distributed, or should be re-design if it wasn't. Design to be distributed uses key based relation or reverse indexes to fits its limitation. In that case, the data set is almost design to be distributed, mixed_gauge strongly encourages your database sharding by its simplicity.
 
-We, offer 24/7 services, must keep our services running. mixed_gauge supports online migrations: adding new nodes to cluster or removing some existing nodes from cluster. It comes with "key distibution model with hash slots" and  database replication and multi-master replication. In sharding we need re-sharding, move data from node to anoter node in cluster, when adding or removing new nodes from cluster. But by setting some rule to node management and using replication, we can finish moving data before adding or removing nodes. The detail operations are specified later chapter of this document.
+We, offer 24/7 services, must keep our services running. mixed_gauge supports online migrations: adding new nodes to cluster or removing some existing nodes from cluster. It comes with "key distibution model with hash slots" and  database replication and multi-master replication. In sharding we need re-sharding, move data from node to another node in cluster, when adding or removing new nodes from cluster. But by setting some rule to node management and using replication, we can finish moving data before adding or removing nodes. The detail operations are specified later chapter of this document.
 
 All operaions should be rollback-able in case of any failures. mixed_gauge's node management can rollback adding and removing nodes operation. The detail operations are specified later chapter of this document.
 
@@ -241,6 +241,107 @@ access_token = AccessToken.put!
 access_token.token #=> a generated token
 ```
 
+## Sharding with Replication
+mixed_gauge also supports replication.
+
+In case you have 2 shards in cluster and each shard have read replica.
+
+- db-user-101 --replicated--> db-user-102
+- db-user-201 --replicated--> db-user-202
+
+Your database connection configuration might be like this:
+
+```yaml
+# database.yml
+production_user_001:
+  adapter: mysql2
+  username: user_writable
+  host: db-user-101
+production_user_002:
+  adapter: mysql2
+  username: user_writable
+  host: db-user-201
+production_user_readonly_001:
+  adapter: mysql2
+  username: user_readonly
+  host: db-user-102
+production_user_readonly_002:
+  adapter: mysql2
+  username: user_writable
+  host: db-user-202
+```
+
+Your initializer for mixed_gauge might be like this:
+
+```ruby
+MixedGauge.configure do |config|
+  config.define_cluster(:user) do |cluster|
+    cluster.define_slot_size(1048576)
+    cluster.register(0..524287, :production_user_001)
+    cluster.register(524288..1048575, :production_user_002)
+  end
+
+  config.define_cluster(:user_readonly) do |cluster|
+    cluster.define_slot_size(1048576)
+    cluster.register(0..524287, :production_user_readonly_001)
+    cluster.register(524288..1048575, :production_user_readonly_002)
+  end
+end
+```
+
+You can split read/write by defining AR model class for each connection:
+
+```ruby
+class User < ActiveRecord::Base
+  include MixedGauge::Model
+  use_cluster :user
+  def_distkey :email
+end
+
+class UserReadonly < ActiveRecord::Base
+  self.table_name = 'users'
+
+  include MixedGauge::Model
+  use_cluster :user_readonly
+  def_distkey :email
+end
+
+User.put!(name: 'Alice', email: 'alice@example.com')
+UserReadonly.get('alice@example.com')
+```
+
+If you want to switch specific shard to another shard in another cluster, define mapping between each model:
+
+```ruby
+class User < ActiveRecord::Base
+  include MixedGauge::Model
+  use_cluster :user
+  def_distkey :email
+
+  replicates_with slave: :UserReadonly
+end
+
+class UserReadonly < ActiveRecord::Base
+  self.table_name = 'users'
+
+  include MixedGauge::Model
+  use_cluster :user_readonly
+  def_distkey :email
+
+  replicates_with master: :User
+end
+```
+
+You can switch to another model which have connection to the shard by calling `.switch`:
+
+```ruby
+UserReadonly.all_shards do |readonly|
+  target_ids = readonly.where(age: 0).pluck(:id)
+  readonly.switch(:master) do |writable|
+    writable.where(id: target_ids).delete_all
+  end
+end
+```
 
 ## Advanced configuration
 ### Hash fucntion
