@@ -123,6 +123,13 @@ RSpec.describe MixedGauge::Model do
     end
   end
 
+  describe '.switch' do
+    it 'retuns result' do
+      result = User.shard_for('x').switch(:slave) { 1 }
+      expect(result).to eq(1)
+    end
+  end
+
   describe '.parent_methods' do
     before do
       model.put!(user_attributes)

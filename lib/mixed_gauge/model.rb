@@ -6,6 +6,7 @@ module MixedGauge
   #     include MixedGauge::Model
   #     use_cluster :user
   #     def_distkey :email
+  #     replicates_with slave: :UserReadonly, backgroud: :UserBackground
   #   end
   #
   #   User.put!(email: 'alice@example.com', name: 'alice')
@@ -22,11 +23,12 @@ module MixedGauge
       class_attribute :cluster_routing, instance_writer: false
       class_attribute :shard_repository, instance_writer: false
       class_attribute :distkey, instance_writer: false
+      class_attribute :replication_mapping, instance_writer: false
     end
 
     module ClassMethods
       # The cluster config must be defined before `use_cluster`.
-      # @param [Symbol] A cluster name which is set by MixedGauge.configure
+      # @param [Symbol] name A cluster name which is set by MixedGauge.configure
       def use_cluster(name)
         config = MixedGauge.config.fetch_cluster_config(name)
         self.cluster_routing = MixedGauge::Routing.new(config)
@@ -39,6 +41,12 @@ module MixedGauge
       # @param [Symbol] column
       def def_distkey(column)
         self.distkey = column.to_sym
+      end
+
+      # @param [Hash{Symbol => Symbol}] mapping A pairs of role name and
+      #   AR model class name.
+      def replicates_with(mapping)
+        self.replication_mapping = MixedGauge::ReplicationMapping.new(mapping)
       end
 
       # Create new record with given attributes in proper shard for given key.
@@ -117,6 +125,21 @@ module MixedGauge
         AllShardsInParallel.new(all_shards)
       end
       alias_method :parallel, :all_shards_in_parallel
+
+      # See example definitions in `spec/models.rb`.
+      # @param [Symbol] A role name of target cluster.
+      # @return [Class, Object] if block given then yielded result else
+      #   target shard model.
+      # @example
+      #   UserReadonly.all_shards.each do |m|
+      #     target_ids = m.where(age: 1).pluck(:id)
+      #     m.switch(:master) do |master|
+      #       master.where(id: target_ids).delete_all
+      #     end
+      #   end
+      def switch(role_name, &block)
+        replication_mapping.switch(self, role_name, &block)
+      end
 
       # Define utility methods which uses all shards or specific shard.
       # These methods can be called from included model class.
