@@ -1,7 +1,7 @@
 module MixedGauge
   # Mapping of slot -> connection_name.
   class ClusterConfig
-    attr_reader :name
+    attr_reader :name, :connection_registry
 
     # @param [Symbol] name
     def initialize(name)

@@ -19,7 +19,7 @@ puts '=== Performance test result ==='
 puts "#{n} times of `User.shard_for` tooks #{elasped_time} sec"
 puts '===        End result       ==='
 
-if elasped_time >= 0.01
+if elasped_time >= 0.1
   exit 1
 else
   exit
