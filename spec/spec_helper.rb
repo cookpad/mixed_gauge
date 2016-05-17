@@ -1,10 +1,10 @@
 require 'simplecov'
 require 'coveralls'
 Coveralls.wear!
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
   SimpleCov::Formatter::HTMLFormatter,
   Coveralls::SimpleCov::Formatter
-]
+])
 SimpleCov.start do
   add_filter '/spec'
 end
@@ -22,15 +22,17 @@ RSpec.configure do |config|
     ActiveRecord::Tasks::DatabaseTasks.root = File.expand_path('../..', __FILE__)
     ActiveRecord::Tasks::DatabaseTasks.env = 'test'
     args = { cluster_name: 'user' }
-    back, $stdout = $stdout, StringIO.new
+    back, $stdout, back_e, $stderr = $stdout, StringIO.new, $stderr, StringIO.new
     MixedGauge::DatabaseTasks.drop_all_databases(args)
     MixedGauge::DatabaseTasks.create_all_databases(args)
     MixedGauge::DatabaseTasks.load_schema_all_databases(args)
-    $stdout = back
+    $stdout, $stderr = back, back_e
   end
 
   config.after(:suite) do
+    back, $stdout, back_e, $stderr = $stdout, StringIO.new, $stderr, StringIO.new
     MixedGauge::DatabaseTasks.drop_all_databases(cluster_name: 'user')
+    $stdout, $stderr = back, back_e
   end
 
   config.after(:each) do
