@@ -7,18 +7,24 @@ rvm:
   - 2.0
   - 2.1
   - 2.2
+  - 2.3
 gemfile:
   - gemfiles/ar_4.1.0.gemfile
   - gemfiles/ar_4.1.7.gemfile
   - gemfiles/ar_4.1.8.gemfile
   - gemfiles/ar_4.2.gemfile
+  - gemfiles/ar_5.0.gemfile
   - gemfiles/rails_edge.gemfile
 matrix:
   allow_failures:
     - gemfile: gemfiles/rails_edge.gemfile
   exclude:
-    # Rails 5 requires to run on Ruby 2.2.0 or newer.
+    # Rails 5 or later requires Ruby 2.2.0 or newer.
     - rvm: 2.0
       gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.1
       gemfile: gemfiles/rails_edge.gemfile
+    - rvm: 2.0
+      gemfile: gemfiles/ar_5.0.gemfile
+    - rvm: 2.1
+      gemfile: gemfiles/ar_5.0.gemfile
