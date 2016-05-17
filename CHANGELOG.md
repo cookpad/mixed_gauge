@@ -1,4 +1,7 @@
 # CHANGELOG for mixed_gauge
+## 1.1.0
+- Replication support. #5
+
 ## 1.0.0
 - Change cluster slots definition interface: does not specify entire slots,
     but specify only slots size.
