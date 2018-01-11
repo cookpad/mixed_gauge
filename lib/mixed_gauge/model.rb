@@ -24,6 +24,7 @@ module MixedGauge
       class_attribute :shard_repository, instance_writer: false
       class_attribute :distkey, instance_writer: false
       class_attribute :replication_mapping, instance_writer: false
+      class_attribute :service, instance_writer: false
     end
 
     module ClassMethods
@@ -33,6 +34,15 @@ module MixedGauge
         config = MixedGauge.config.fetch_cluster_config(name)
         self.cluster_routing = MixedGauge::Routing.new(config)
         self.shard_repository = MixedGauge::ShardRepository.new(config, self)
+        thread_size = (shard_repository.all.size * 100)
+        self.service = Expeditor::Service.new(
+          executor: Concurrent::ThreadPoolExecutor.new(
+            min_threads: thread_size,
+            max_threads: thread_size,
+            max_queue: shard_repository.all.size,
+            fallback_policy: :abort,
+          )
+        )
         self.abstract_class = true
       end
 
@@ -122,7 +132,7 @@ module MixedGauge
       # @example
       #   User.all_shards_in_parallel.map {|m| m.where.find_by(name: 'Alice') }.compact
       def all_shards_in_parallel
-        AllShardsInParallel.new(all_shards)
+        AllShardsInParallel.new(all_shards, service: service)
       end
       alias_method :parallel, :all_shards_in_parallel
 

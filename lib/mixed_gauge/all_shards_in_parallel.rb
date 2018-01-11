@@ -2,9 +2,11 @@ module MixedGauge
   # Support parallel execution with each shard and deal with AR connection
   # management in parallel execution.
   class AllShardsInParallel
-    # @param [Array<Class>] An array of shard model class
-    def initialize(shards)
+    # @param [Array<Class>] shards An array of shard model class
+    # @param [Expeditor::Service] service
+    def initialize(shards, service:)
       @shards = shards
+      @service = service
     end
 
     # @yield [Class] A shard model class
@@ -13,7 +15,7 @@ module MixedGauge
     #   User.all_shards_in_parallel.map(&:count).reduce(&:+)
     def map(&block)
       commands = @shards.map do |m|
-        Expeditor::Command.new { m.connection_pool.with_connection { yield m } }
+        Expeditor::Command.new(service: @service) { m.connection_pool.with_connection { yield m } }
       end
       commands.each(&:start)
       commands.map(&:get)

@@ -2,7 +2,17 @@ require 'spec_helper'
 
 RSpec.describe MixedGauge::AllShardsInParallel do
   let(:model_class) { User }
-  let(:instance) { described_class.new(model_class.all_shards) }
+  let(:instance) { described_class.new(model_class.all_shards, service: service) }
+  let(:service) { Expeditor::Service.new(executor: executor) }
+  let(:executor) do
+    thread_size = model_class.all_shards.size * 100
+    Concurrent::ThreadPoolExecutor.new(
+      min_threads: thread_size,
+      max_threads: thread_size,
+      max_queue: model_class.all_shards.size,
+      fallback_policy: :abort,
+    )
+  end
 
   describe '#map' do
     it 'maps in parallel' do
