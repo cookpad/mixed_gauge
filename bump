@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+level = ARGV.first
+if level.nil?
+  warn "Example: #{__FILE__} (tiny|minor|major)"
+  exit 1
+end
+
+path = 'lib/mixed_gauge/version.rb'
+regexp = /VERSION = '(.+)'.freeze$/
+version = File.read(path).scan(regexp)[0][0]
+version_strs = version.split('.')
+
+if version_strs.size > 3
+  warn "Current version includes a prelease suffix, drop it: #{version}"
+  version_strs = version_strs[0..2]
+end
+
+case level
+when 'tiny'
+  version_strs[2] = version_strs[2].to_i + 1
+when 'minor'
+  version_strs[1] = version_strs[1].to_i + 1
+  version_strs[2] = 0
+when 'major'
+  version_strs[0] = version_strs[0].to_i + 1
+  version_strs[1] = 0
+  version_strs[2] = 0
+else
+  warn "Example: #{__FILE__} (tiny|minor|major)"
+  exit 1
+end
+
+next_version = version_strs.join('.')
+File.write(path, File.read(path).gsub(regexp, "VERSION = '#{next_version}'.freeze"))
+system('git', 'add', path)
+system('git', 'commit', '-m', "v#{next_version}")
