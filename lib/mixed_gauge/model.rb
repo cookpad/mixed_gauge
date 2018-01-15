@@ -30,11 +30,11 @@ module MixedGauge
     module ClassMethods
       # The cluster config must be defined before `use_cluster`.
       # @param [Symbol] name A cluster name which is set by MixedGauge.configure
-      def use_cluster(name)
+      def use_cluster(name, thread_pool_size_base: 3)
         config = MixedGauge.config.fetch_cluster_config(name)
         self.cluster_routing = MixedGauge::Routing.new(config)
         self.shard_repository = MixedGauge::ShardRepository.new(config, self)
-        thread_size = (shard_repository.all.size * 100)
+        thread_size = (shard_repository.all.size * thread_pool_size_base)
         self.service = Expeditor::Service.new(
           executor: Concurrent::ThreadPoolExecutor.new(
             min_threads: thread_size,
