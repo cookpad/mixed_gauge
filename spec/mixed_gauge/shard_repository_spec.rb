@@ -3,7 +3,13 @@ require 'spec_helper'
 RSpec.describe MixedGauge::ShardRepository do
   let(:repository) { described_class.new(cluster_config, base_class) }
   let(:cluster_config) { MixedGauge.config.fetch_cluster_config(:user) }
-  let(:base_class) { Class.new(ActiveRecord::Base) { def self.name; 'User' end } }
+  let(:base_class) do
+    Class.new(ActiveRecord::Base) do
+      def self.name
+        'User'
+      end
+    end
+  end
 
   describe '#fetch' do
     let(:connection_name) { cluster_config.connections.first }

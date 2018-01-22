@@ -14,19 +14,19 @@ ActiveRecord::Base.establish_connection(:test)
 
 MixedGauge.configure do |config|
   config.define_cluster(:user) do |cluster|
-    cluster.define_slot_size(1048576)
-    cluster.register(0..262143, :test_user_001)
-    cluster.register(262144..524287, :test_user_002)
-    cluster.register(524288..786431, :test_user_003)
-    cluster.register(786432..1048575, :test_user_004)
+    cluster.define_slot_size(1_048_576)
+    cluster.register(0..262_143, :test_user_001)
+    cluster.register(262_144..524_287, :test_user_002)
+    cluster.register(524_288..786_431, :test_user_003)
+    cluster.register(786_432..1_048_575, :test_user_004)
   end
 
   config.define_cluster(:user_readonly) do |cluster|
-    cluster.define_slot_size(1048576)
-    cluster.register(0..262143, :test_user_readonly_001)
-    cluster.register(262144..524287, :test_user_readonly_002)
-    cluster.register(524288..786431, :test_user_readonly_003)
-    cluster.register(786432..1048575, :test_user_readonly_004)
+    cluster.define_slot_size(1_048_576)
+    cluster.register(0..262_143, :test_user_readonly_001)
+    cluster.register(262_144..524_287, :test_user_readonly_002)
+    cluster.register(524_288..786_431, :test_user_readonly_003)
+    cluster.register(786_432..1_048_575, :test_user_readonly_004)
   end
 end
 

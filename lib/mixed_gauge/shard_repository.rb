@@ -1,4 +1,5 @@
 module MixedGauge
+  # Manages generated AR models
   class ShardRepository
     attr_reader :base_class
 
@@ -22,7 +23,7 @@ module MixedGauge
     # @param [Range] slots
     # @return [Class, nil] A AR model class.
     def fetch_by_slots(assigned_slots)
-      @shards.find {|_, model| model.assigned_slots == assigned_slots }[1]
+      @shards.find { |_, model| model.assigned_slots == assigned_slots }[1]
     end
 
     # @return [Array<Class>]
@@ -60,7 +61,7 @@ module MixedGauge
     # @param [Symbol] connection_name
     # @return [String]
     def generate_class_name(connection_name)
-      "ShardFor#{connection_name.to_s.gsub('-', '_').classify}"
+      "ShardFor#{connection_name.to_s.tr('-', '_').classify}"
     end
   end
 end

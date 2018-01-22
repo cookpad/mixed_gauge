@@ -1,8 +1,9 @@
 require 'zlib'
 
 module MixedGauge
+  # Holding global configuration
   class Config
-    DEFAULT_HASH_FUNCTION = -> (key) { Zlib.crc32(key) }
+    DEFAULT_HASH_FUNCTION = ->(key) { Zlib.crc32(key) }
 
     attr_reader :hash_proc, :cluster_configs
 
@@ -34,7 +35,7 @@ module MixedGauge
     # See README.md for example.
     def register_hash_function(&block)
       raise ArgumentError if block.arity != 1
-      raise ArgumentError unless block.call('test value').is_a? Integer
+      raise ArgumentError unless yield('test value').is_a? Integer
       @hash_proc = block
     end
   end

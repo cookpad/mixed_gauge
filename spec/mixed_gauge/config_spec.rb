@@ -20,13 +20,13 @@ RSpec.describe MixedGauge::Config do
 
     context 'when given proc wihch returns string' do
       it 'raises ArgumentError' do
-        expect { config.register_hash_function {|key| 'x' } }.to raise_error(ArgumentError)
+        expect { config.register_hash_function { |_key| 'x' } }.to raise_error(ArgumentError)
       end
     end
 
     context 'when given proper hash function proc' do
       it 'sets given proc' do
-        config.register_hash_function {|key| 1 }
+        config.register_hash_function { |_key| 1 }
         expect(config.hash_proc.call(key)).to eq(1)
       end
     end

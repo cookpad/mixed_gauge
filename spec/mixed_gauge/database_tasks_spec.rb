@@ -3,14 +3,14 @@ require 'spec_helper'
 RSpec.describe MixedGauge::DatabaseTasks do
   describe '#to_rake_task' do
     it 'retuns a Rake::Task' do
-      stub_const('Rake::Task', { 'test' => 1 })
+      stub_const('Rake::Task', 'test' => 1)
       expect(described_class.to_rake_task('test')).to eq(1)
     end
   end
 
   describe '#cluster_names' do
     it 'retuns an Array of cluster name' do
-      expect(described_class.cluster_names).to eq([:user, :user_readonly])
+      expect(described_class.cluster_names).to eq(%i[user user_readonly])
     end
   end
 
@@ -29,9 +29,9 @@ RSpec.describe MixedGauge::DatabaseTasks do
     end
 
     it 'raises KeyError when cluster config is not found' do
-      expect {
+      expect do
         described_class.fetch_cluster_config(:not_found)
-      }.to raise_error(KeyError)
+      end.to raise_error(KeyError)
     end
   end
 
@@ -54,10 +54,10 @@ RSpec.describe MixedGauge::DatabaseTasks do
   describe 'TasksForMultipleClusters' do
     describe '#invoke_task_for_all_clusters' do
       it 'calls #invoke_task' do
-        allow(described_class).to receive(:cluster_names).
-          and_return(['test_cluster'])
-        expect(described_class).to receive(:invoke_task).
-          with('test', 'test_cluster')
+        allow(described_class).to receive(:cluster_names)
+          .and_return(['test_cluster'])
+        expect(described_class).to receive(:invoke_task)
+          .with('test', 'test_cluster')
 
         described_class.invoke_task_for_all_clusters('test')
       end
@@ -69,10 +69,10 @@ RSpec.describe MixedGauge::DatabaseTasks do
       let(:rake_task) { double(invoke: nil, reenable: nil) }
 
       it 'invoke given task name with prefix then reenable the task' do
-        expect(described_class).to receive(:to_rake_task).
-          at_least(:once).
-          with("mixed_gauge:#{task_name}").
-          and_return(rake_task)
+        expect(described_class).to receive(:to_rake_task)
+          .at_least(:once)
+          .with("mixed_gauge:#{task_name}")
+          .and_return(rake_task)
         expect(rake_task).to receive(:invoke).once.with(cluster_name)
         expect(rake_task).to receive(:reenable).once
         described_class.invoke_task(task_name, cluster_name)
@@ -85,9 +85,9 @@ RSpec.describe MixedGauge::DatabaseTasks do
     let(:cluster_config) { double(connections: [:test_connection]) }
 
     before do
-      allow(described_class).to receive(:fetch_cluster_config).
-        with(:test_cluster).
-        and_return(cluster_config)
+      allow(described_class).to receive(:fetch_cluster_config)
+        .with(:test_cluster)
+        .and_return(cluster_config)
     end
 
     describe '#create_all_databases' do
@@ -116,22 +116,22 @@ RSpec.describe MixedGauge::DatabaseTasks do
 
       it 'exits with error' do
         expect(described_class).not_to receive(:create)
-        expect {
+        expect do
           described_class.create_all_databases(args)
-        }.to output(/Missing cluster_name/).to_stderr.and raise_error(SystemExit)
+        end.to output(/Missing cluster_name/).to_stderr.and raise_error(SystemExit)
       end
     end
 
     context 'when given invalid cluster_name' do
       it 'exits with error' do
-        allow(described_class).to receive(:fetch_cluster_config).
-          with(:test_cluster).
-          and_raise(KeyError)
+        allow(described_class).to receive(:fetch_cluster_config)
+          .with(:test_cluster)
+          .and_raise(KeyError)
 
         expect(described_class).not_to receive(:create)
-        expect {
+        expect do
           described_class.create_all_databases(args)
-        }.to output(/not found/).to_stderr.and raise_error(SystemExit)
+        end.to output(/not found/).to_stderr.and raise_error(SystemExit)
       end
     end
   end

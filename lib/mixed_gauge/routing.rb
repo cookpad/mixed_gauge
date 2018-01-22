@@ -1,6 +1,7 @@
 require 'digest/md5'
 
 module MixedGauge
+  # Routing from key to database connection
   class Routing
     # @param [ClusterConfig] cluster_config
     def initialize(cluster_config)

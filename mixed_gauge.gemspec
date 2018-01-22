@@ -1,4 +1,5 @@
-# coding: utf-8
+# rubocop:disable Metrics/LineLength
+
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'mixed_gauge/version'
@@ -9,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Taiki Ono']
   spec.email         = ['taiks.4559@gmail.com']
 
-  spec.summary       = %{A simple and robust ActiveRecord extension for database sharding.}
-  spec.description   = %{#{spec.summary} Supports shards management with hash slots, re-sharding support, efficient KVS queries, limited RDB queries.}
+  spec.summary       = %(A simple and robust ActiveRecord extension for database sharding.)
+  spec.description   = %(#{spec.summary} Supports shards management with hash slots, re-sharding support, efficient KVS queries, limited RDB queries.)
   spec.homepage      = 'https://github.com/taiki45/mixed_gauge'
   spec.license       = 'MIT'
 
@@ -32,3 +33,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'sqlite3'
 end
+
+# rubocop:enable Metrics/LineLength

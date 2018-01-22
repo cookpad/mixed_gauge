@@ -13,7 +13,7 @@ module MixedGauge
     # @return [Array] A result
     # @example
     #   User.all_shards_in_parallel.map(&:count).reduce(&:+)
-    def map(&block)
+    def map
       commands = @shards.map do |m|
         Expeditor::Command.new(service: @service) { m.connection_pool.with_connection { yield m } }
       end
