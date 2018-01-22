@@ -11,8 +11,13 @@ version = File.read(path).scan(regexp)[0][0]
 version_strs = version.split('.')
 
 if version_strs.size > 3
-  warn "Current version includes a prelease suffix, drop it: #{version}"
+  puts "Current version includes a prelease suffix, drop it: #{version}"
   version_strs = version_strs[0..2]
+  next_version = version_strs.join('.')
+  File.write(path, File.read(path).gsub(regexp, "VERSION = '#{next_version}'.freeze"))
+  system('git', 'add', path)
+  system('git', 'commit', '-m', "v#{next_version}")
+  exit
 end
 
 case level
