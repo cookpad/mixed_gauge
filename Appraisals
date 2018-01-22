@@ -14,8 +14,8 @@ appraise 'ar-4.2' do
   gem 'activerecord', '~> 4.2'
 end
 
-appraise 'ar-5.0' do
-  gem 'activerecord', '5.0.0.rc1'
+appraise 'ar-5' do
+  gem 'activerecord', '~> 5.0'
 end
 
 appraise 'rails-edge' do
