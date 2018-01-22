@@ -9,8 +9,13 @@ begin
 rescue LoadError
 end
 
+require 'rubocop/rake_task'
+RuboCop::RakeTask.new
+
+task default: %i[spec rubocop]
+
 task :performance_test do
   ruby 'spec/performance_test.rb'
 end
 
-task :default => [:spec, :performance_test]
+task :default => [:spec, :rubocop, :performance_test]

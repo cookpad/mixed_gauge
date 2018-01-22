@@ -1,0 +1,11 @@
+AllCops:
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+
+Metrics/BlockLength: { Enabled: false } # With Ruby DSL, block length can grow
+Metrics/LineLength: { Max: 120 }
+Metrics/MethodLength: { Max: 20 }
+Layout/IndentHeredoc: { Enabled: false } # Focusing texual appearance is wrong
+Style/GuardClause: { Enabled: false } # crazy
+Style/ParallelAssignment: { Enabled: false } # crazy
+Style/StderrPuts: { Enabled: false } # WTF
