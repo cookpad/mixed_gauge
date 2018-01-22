@@ -1,4 +1,7 @@
 # CHANGELOG for mixed_gauge
+## 1.2.0
+- Don't enqueue parallel executions, run them immediately #7
+
 ## 1.1.0
 - Replication support. #5
 
