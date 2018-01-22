@@ -1,77 +1,79 @@
 module MixedGauge
+  # Offers database related Rake tasks
   module DatabaseTasks
-    extend self
+    class << self
+      # @return [Boolean]
+      def ar5?
+        ActiveRecord::VERSION::MAJOR == 5
+      end
 
-    # @return [Boolean]
-    def ar5?
-      ActiveRecord::VERSION::MAJOR == 5
-    end
+      # @return [Boolean]
+      def ar4?
+        ActiveRecord::VERSION::MAJOR == 4
+      end
 
-    # @return [Boolean]
-    def ar4?
-      ActiveRecord::VERSION::MAJOR == 4
-    end
+      # @return [Boolean]
+      def ar42?
+        ar4? && ActiveRecord::VERSION::MINOR == 2
+      end
 
-    # @return [Boolean]
-    def ar42?
-      ar4? && ActiveRecord::VERSION::MINOR == 2
-    end
+      # @return [Boolean]
+      def ar41?
+        ar4? && ActiveRecord::VERSION::MINOR == 1
+      end
 
-    # @return [Boolean]
-    def ar41?
-      ar4? && ActiveRecord::VERSION::MINOR == 1
-    end
+      # @return [Boolean]
+      def ar417_above?
+        ar41? && ActiveRecord::VERSION::TINY > 7
+      end
 
-    # @return [Boolean]
-    def ar417_above?
-      ar41? && ActiveRecord::VERSION::TINY > 7
-    end
-
-    # Show information of database sharding config.
-    def info
-      puts "All clusters registered to mixed_gauge"
-      puts
-      clusters.each do |cluster|
-        puts "= Cluster: #{cluster.name} ="
-        cluster.connections.each do |name|
-          puts "- #{name}"
-        end
+      # Show information of database sharding config.
+      def info
+        puts 'All clusters registered to mixed_gauge'
         puts
+        clusters.each do |cluster|
+          puts "= Cluster: #{cluster.name} ="
+          cluster.connections.each do |name|
+            puts "- #{name}"
+          end
+          puts
+        end
+      end
+
+      # @private
+      # @param [String] task_name
+      # @return [Rake::Task]
+      def to_rake_task(task_name)
+        Rake::Task[task_name]
+      end
+
+      # @private
+      # @return [Array<Symbol>]
+      def cluster_names
+        MixedGauge.config.cluster_configs.keys
+      end
+
+      # @private
+      # @return [Array<MixedGauge::ClusterConfig>]
+      def clusters
+        MixedGauge.config.cluster_configs.values
+      end
+
+      # @private
+      # @return [MixedGauge::ClusterConfig]
+      # @raise [KeyError]
+      def fetch_cluster_config(cluster_name)
+        MixedGauge.config.fetch_cluster_config(cluster_name)
+      end
+
+      # For mock-ablity
+      # @private
+      def exit_with_error
+        exit 1
       end
     end
 
-    # @private
-    # @param [String] task_name
-    # @return [Rake::Task]
-    def to_rake_task(task_name)
-      Rake::Task[task_name]
-    end
-
-    # @private
-    # @return [Array<Symbol>]
-    def cluster_names
-      MixedGauge.config.cluster_configs.keys
-    end
-
-    # @private
-    # @return [Array<MixedGauge::ClusterConfig>]
-    def clusters
-      MixedGauge.config.cluster_configs.values
-    end
-
-    # @private
-    # @return [MixedGauge::ClusterConfig]
-    # @raise [KeyError]
-    def fetch_cluster_config(cluster_name)
-      MixedGauge.config.fetch_cluster_config(cluster_name)
-    end
-
-    # For mock-ablity
-    # @private
-    def exit_with_error
-      exit 1
-    end
-
+    # TasksForMultipleClusters
     module TasksForMultipleClusters
       # @param [String] task_name
       def invoke_task_for_all_clusters(task_name)
@@ -125,7 +127,7 @@ module MixedGauge
       # @param [Hash{Symbol => String}] args
       # @return [String]
       def cluster_name_or_error(name, args)
-        unless cluster_name = args[:cluster_name]
+        unless (cluster_name = args[:cluster_name])
           $stderr.puts <<-MSG
 Missing cluster_name. Find cluster_name via `rake mixed_gauge:info` then call `rake "mixed_gauge:#{name}[$cluster_name]"`.
           MSG
@@ -139,7 +141,7 @@ Missing cluster_name. Find cluster_name via `rake mixed_gauge:info` then call `r
       def cluster_or_error(cluster_name)
         fetch_cluster_config(cluster_name.to_sym)
       rescue KeyError
-        $stderr.puts %!cluster name "#{cluster_name}" not found.!
+        $stderr.puts %(cluster name "#{cluster_name}" not found.)
         exit_with_error
       end
     end
@@ -165,12 +167,11 @@ Missing cluster_name. Find cluster_name via `rake mixed_gauge:info` then call `r
       def load_schema(connection_name)
         configuration = ActiveRecord::Base.configurations[connection_name]
 
-        case
-        when ar5?
+        if ar5?
           ActiveRecord::Tasks::DatabaseTasks.load_schema(configuration, :ruby)
-        when ar42? || ar417_above?
+        elsif ar42? || ar417_above?
           ActiveRecord::Tasks::DatabaseTasks.load_schema_for(configuration, :ruby)
-        when ar41?
+        elsif ar41?
           ActiveRecord::Base.establish_connection(configuration)
           ActiveRecord::Tasks::DatabaseTasks.load_schema(:ruby)
         else

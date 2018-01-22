@@ -5,13 +5,13 @@ require 'mixed_gauge'
 
 require File.expand_path('../models', __FILE__)
 
-def measure(n, &block)
+def measure(n)
   prev = Time.now
-  n.times { block.call }
+  n.times { yield }
   Time.now - prev
 end
 
-n = 10 ** 3
+n = 10**3
 s = SecureRandom.hex(32)
 elasped_time = measure(n) { User.shard_for(s) }
 

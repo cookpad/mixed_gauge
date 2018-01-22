@@ -21,7 +21,7 @@ RSpec.describe MixedGauge::Model do
 
       parent_methods do
         def find_from_all_by_name(name)
-          all_shards.map {|m| m.find_by(name: name) }.compact.first
+          all_shards.map { |m| m.find_by(name: name) }.compact.first
         end
       end
     end
@@ -41,9 +41,9 @@ RSpec.describe MixedGauge::Model do
       before { user_attributes.delete(:email) }
 
       it 'raises MissingDistkeyAttribute error' do
-        expect {
+        expect do
           model.put!(user_attributes)
-        }.to raise_error(MixedGauge::MissingDistkeyAttribute)
+        end.to raise_error(MixedGauge::MissingDistkeyAttribute)
       end
     end
   end
@@ -78,15 +78,15 @@ RSpec.describe MixedGauge::Model do
 
     context 'when record not exists' do
       it 'raises MixedGauge::RecordNotFound' do
-        expect {
+        expect do
           model.get!('not_exist@example.com')
-        }.to raise_error(MixedGauge::RecordNotFound)
+        end.to raise_error(MixedGauge::RecordNotFound)
       end
 
       it 'raises sub class of ActiveRecord::RecordNotFound' do
-        expect {
+        expect do
           model.get!('not_exist@example.com')
-        }.to raise_error(ActiveRecord::RecordNotFound)
+        end.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
   end
@@ -112,7 +112,7 @@ RSpec.describe MixedGauge::Model do
     before { model.put!(user_attributes) }
 
     it 'returns all AR model classes and can search by finder methods' do
-      records = model.all_shards.flat_map {|m| m.find_by(name: 'Alice') }.compact
+      records = model.all_shards.flat_map { |m| m.find_by(name: 'Alice') }.compact
       expect(records.size).to eq(1)
     end
   end

@@ -11,6 +11,7 @@ require 'mixed_gauge/replication_mapping'
 require 'mixed_gauge/all_shards_in_parallel'
 require 'mixed_gauge/model'
 
+# MixedGauge
 module MixedGauge
   class << self
     # @return [MixedGauge::Config]

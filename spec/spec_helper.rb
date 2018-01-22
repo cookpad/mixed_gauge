@@ -1,10 +1,12 @@
 require 'simplecov'
 require 'coveralls'
 Coveralls.wear!
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
-  SimpleCov::Formatter::HTMLFormatter,
-  Coveralls::SimpleCov::Formatter
-])
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+  [
+    SimpleCov::Formatter::HTMLFormatter,
+    Coveralls::SimpleCov::Formatter
+  ]
+)
 SimpleCov.start do
   add_filter '/spec'
 end
@@ -64,9 +66,7 @@ RSpec.configure do |config|
 
   config.warnings = true if ENV['RSPEC_WARNING'] == '1'
 
-  if config.files_to_run.one?
-    config.default_formatter = 'doc'
-  end
+  config.default_formatter = 'doc' if config.files_to_run.one?
 
   config.profile_examples = 10 if ENV['PROFILE_EXAMPLE'] == '1'
 

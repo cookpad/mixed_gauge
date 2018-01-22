@@ -27,6 +27,7 @@ module MixedGauge
       class_attribute :service, instance_writer: false
     end
 
+    # ClassMethods
     module ClassMethods
       # The cluster config must be defined before `use_cluster`.
       # @param [Symbol] name A cluster name which is set by MixedGauge.configure
@@ -40,7 +41,7 @@ module MixedGauge
             min_threads: thread_size,
             max_threads: thread_size,
             max_queue: shard_repository.all.size,
-            fallback_policy: :abort,
+            fallback_policy: :abort
           )
         )
         self.abstract_class = true
@@ -69,7 +70,7 @@ module MixedGauge
         raise '`distkey` is not defined. Use `def_distkey`.' unless distkey
         @before_put_callback.call(attributes) if @before_put_callback
 
-        if key = attributes[distkey] || attributes[distkey.to_s]
+        if (key = attributes[distkey]) || attributes[distkey.to_s]
           shard_for(key).create!(attributes)
         else
           raise MixedGauge::MissingDistkeyAttribute
@@ -91,7 +92,7 @@ module MixedGauge
       # @return [ActiveRecord::Base] A shard model instance
       # @raise [MixedGauge::RecordNotFound]
       def get!(key)
-        get(key) or raise MixedGauge::RecordNotFound
+        get(key) || raise(MixedGauge::RecordNotFound)
       end
 
       # Register hook to assign auto-generated distkey or something.
@@ -134,7 +135,7 @@ module MixedGauge
       def all_shards_in_parallel
         AllShardsInParallel.new(all_shards, service: service)
       end
-      alias_method :parallel, :all_shards_in_parallel
+      alias parallel all_shards_in_parallel
 
       # See example definitions in `spec/models.rb`.
       # @param [Symbol] A role name of target cluster.

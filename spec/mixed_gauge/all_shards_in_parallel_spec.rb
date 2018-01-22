@@ -10,7 +10,7 @@ RSpec.describe MixedGauge::AllShardsInParallel do
       min_threads: thread_size,
       max_threads: thread_size,
       max_queue: model_class.all_shards.size,
-      fallback_policy: :abort,
+      fallback_policy: :abort
     )
   end
 
@@ -30,16 +30,16 @@ RSpec.describe MixedGauge::AllShardsInParallel do
     end
 
     it 'flat_maps in parallel' do
-      result = instance.flat_map {|m| m.where(name: 'Alice') }
+      result = instance.flat_map { |m| m.where(name: 'Alice') }
       expect(result.size).to eq(2)
     end
   end
 
   describe '#each' do
     it 'enables to query in parallel' do
-      expect {
-        instance.each {|_| print 'XXX' }
-      }.to output('XXX' * 4).to_stdout
+      expect do
+        instance.each { |_| print 'XXX' }
+      end.to output('XXX' * 4).to_stdout
     end
 
     it 'returns self when block is not given' do
